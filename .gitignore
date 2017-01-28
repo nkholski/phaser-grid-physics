@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.vscode/
+*.bak*
+*.hidden*
+demo/js
+*.zip
+*.skn
+*.slc
+*.txt
