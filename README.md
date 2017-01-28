@@ -65,10 +65,10 @@ sprite.body.setVelocity(50, 0);
 
 ## Future features
 Depending on the interest I may add extra features. Some of the features is quick-fixes that I just typed down to remember them, others will be a bit more challenging. Possible ideas in no particular order:
-* **Tilemap:**
+* *Tilemap:*
    * Ground types: Slippery, slowdown (factor), moving
    * getPath(x,y,x2,y2)
-* **Body:**
+* *Body:*
    * setGridPosition
    * Gestures: Jump, Shake etc.
    * movement.slide - Slide around corners to prevent getting stuck (pressing up with a character with the top right part of the body blocked will result in sliding to the left if it would be possible to walk up in the next step)
