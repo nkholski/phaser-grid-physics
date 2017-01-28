@@ -65,6 +65,7 @@ sprite.body.setVelocity(50, 0);
 
 ## Future features
 Depending on the interest I may add extra features. Some of the features is quick-fixes that I just typed down to remember them, others will be a bit more challenging. Possible ideas in no particular order:
+
 * *Tilemap:*
    * Ground types: Slippery, slowdown (factor), moving
    * getPath(x,y,x2,y2)
