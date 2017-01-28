@@ -85,7 +85,7 @@ Depending on the interest I may add extra features. Some of the features is quic
    * Moving platforms
    * Drag
    * Magnetism
-   * Cojoined bodies
+   * Conjoined bodies
    * Gravity.x/y
    * Pause
    * MoveCountToXY - numbers of moves necessarily (using pathfinding)

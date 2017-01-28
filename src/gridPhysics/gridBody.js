@@ -597,6 +597,18 @@
      }
 
      moveToXY(x, y, speed = 60, maxTime = 0, active = true) {
+          /*
+            Yes, I know that this is ridiculously inefficient rebuilding the grid from the tilemap
+            on each call without any cache, and trying to find the path of the full current map
+            even if it's not necessarily in most cases.
+
+            It's also still buggy. Different bodysizes and stuff is a challenge, and now
+            the body size is locked to 2x2 of the grid size.
+
+            And, also it just checks the first tilemap layer for collision even if you added more.
+
+          */
+
 
          if (typeof(EasyStar) === 'undefined') {
              console.error("Grid Physics error: Easystar.js must be enabled!");
@@ -612,7 +624,7 @@
          // Respond
          let grid = [];
          let i = 0;
-         let tileRatio = { x: 2, y:2};
+         let tileRatio = { x: this.physics.tilemaplayers[0].layer.data[0][0].width/game.physics.gridPhysics.gridSize.x, y:this.physics.tilemaplayers[0].layer.data[0][0].height/game.physics.gridPhysics.gridSize.y};
          for (let row of this.physics.tilemaplayers[0].layer.data) {
              grid[i] = [];
              grid[i + 1] = [];
