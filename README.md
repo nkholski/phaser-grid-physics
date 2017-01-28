@@ -6,6 +6,9 @@ Please note that the plugin is not suitable for production use yet. Buildning st
 
 Help wanted! I'm stuck at making a way to build stand-alone plugin for others to use. My idea is to keep developing the plugin as a part of the demo project. If possible I want the source for the plugin in a src folder in the root folder, and the demo in a demo-source folder. I would like to be able to build the plugin so that ends up in in the dist folder.
 
+## Demo
+Demo is hosted here: http://metroid.niklasberg.se/gridPhysics/
+
 ## Credits
 * Project is based on Phaser-ES6-Webpack by Leandro Cabrera: https://github.com/lean/phaser-es6-webpack
 * Tileset and sprites: Dawnlike by DragonDePlatino, DawnBringer. http://opengameart.org/content/dawnlike-16x16-universal-rogue-like-tileset-v181
