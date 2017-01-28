@@ -6,6 +6,8 @@ Please note that the plugin is not suitable for production use yet. Buildning st
 
 Help wanted! I'm stuck at making a way to build stand-alone plugin for others to use. My idea is to keep developing the plugin as a part of the demo project. If possible I want the source for the plugin in a src folder in the root folder, and the demo in a demo-source folder. I would like to be able to build the plugin so that ends up in in the dist folder.
 
+For instructions, see Setup section in the end of this file.
+
 ## Demo
 Demo is hosted here: http://metroid.niklasberg.se/gridPhysics/
 
@@ -92,5 +94,55 @@ Depending on the interest I may add extra features. Some of the features is quic
    * Trying to go x,y simulanously - If x wont work, try y.
    * forcedMovement (being pushed overrides the the desired velocioty of the object)
 
-## Documentation
+## Setup
+This section is a slightly modified copy from phaser-es6-webpack. You'll to install a few things before you have a working copy of the project.
+
+### 1. Clone this repo:
+Navigate into your workspace directory.
+Run:
+``` git clone https://github.com/nkholski/grid-physics ```
+
+
+###2. Install node.js and npm:
+https://nodejs.org/en/
+
+
+### 3. Install dependencies:
+   Navigate to the cloned repo’s directory.
+
+   Run:
+
+   ```npm install```
+
+### 4. Run the development server (demo):
+
+   Run:
+
+   ```npm run dev```
+
+   This will run a server so you can run the game in a browser.
+
+   Open your browser and enter localhost:3000 into the address bar.
+
+   Also this will start a watch process, so you can change the source and the process will recompile and refresh the browser
+
+
+### 5. Build demo:
+
+   Run:
+
+   ```npm run deploy```
+
+   This will optimize and minimize the compiled bundle.
+
+### 6. Build plugin:
+
+   Run:
+
+  ```npm run deploy```
+
+  This is not working ATM :-(.
+
+
+## API Documentation
 Not yet. To much is in flux.
