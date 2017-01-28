@@ -19,11 +19,11 @@ Grid based movement isn't very complicated (Move your sprite one step to the rig
 * Any grid size  (not necessarily squares, i.e. 8x16 is possible, and not restricted to sprite or tile-sizes).
 * Turn-based or real time.
 * Visual debugging
-* Tilemap:
+* *Tilemap:*
    * Tile dimensions may differ from grid dimensions (but needs to be multiple of the grid dimensions, like 16x16 tiles on an 8x8 grid).
    * Collision detection against tiles with callback.
    * Tile collisions on specified directions only
-* Bodies (sprites):
+* *Bodies (sprites):*
    * Body size is not restricted to grid-size, and different body sizes may co-exist (but must be equal or a multiple of grid dimensions. The sprite graphics may differ from body size.)
    * Path finding (easystar.js depencency)
    * Moveable objects (can be chained, i.e. the player push one crate against another crate that will also move).
@@ -60,10 +60,10 @@ sprite.body.setVelocity(50, 0);
 
 # Future features
 Depending on the interest I may add extra features. Some of the features is quick-fixes that I just typed down to remember them, others will be a bit more challenging. Possible ideas in no particular order:
-1. Tilemap:
+* **Tilemap:**
    * Ground types: Slippery, slowdown (factor), moving
    * getPath(x,y,x2,y2)
-2. Body:
+* **Body:**
    * setGridPosition
    * Gestures: Jump, Shake etc.
    * movement.slide - Slide around corners to prevent getting stuck (pressing up with a character with the top right part of the body blocked will result in sliding to the left if it would be possible to walk up in the next step)
