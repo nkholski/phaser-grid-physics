@@ -2,10 +2,11 @@
 
 The Grid Physics plugin is to Arcade physics what Arcade physics is to Box2D. :-) This plugin adds support for grid/tile based movement along with some other stuff to make your life easier if you choose the path of grid restricted movement. My aim is to build the API as close as possible to Arcade physics.
 
-*Setup:* Go to the end of this file.
+**Setup instructions** is in the end of this file.
+**Demo** is hosted here: http://metroid.niklasberg.se/gridPhysics/
 
-## Demo
-Demo is hosted here: http://metroid.niklasberg.se/gridPhysics/
+## Help wanted!
+I'm stuck at making a way to build stand-alone plugin for others to use. My idea is to keep developing the plugin as a part of the demo project. If possible I want the source for the plugin in a src folder in the root folder, and the demo in a demo-source folder. I would like to be able to build the plugin so that ends up in in the dist folder.
 
 ## Credits
 * Project is based on Phaser-ES6-Webpack by Leandro Cabrera: https://github.com/lean/phaser-es6-webpack
@@ -13,13 +14,10 @@ Demo is hosted here: http://metroid.niklasberg.se/gridPhysics/
 * Hero sprite by Gazer: http://opengameart.org/content/overhead-action-rpg-characters
 * I don't remember the source for the box graphics.
 
-
 ## Current state of the plugin
-
 Please note that the plugin is not suitable for production use yet. Buildning stand-alone plugin is not yet working, but you can import the source files into your project as long you have something set up that support imports and ES6/2005. The API is not set in stone. Ideas are added randomly, and probably not in the smartest way from start. The demo is based on a prototype for a game and will need to be replaced or reworked. The code needs to be cleaned up. A lot of comments are in Swedish, and the source is largely uncommented. *Anyway:* I added it to Github to allow others to try it, and to invite anyone interested to contribute.
 
-## Help wanted!
-I'm stuck at making a way to build stand-alone plugin for others to use. My idea is to keep developing the plugin as a part of the demo project. If possible I want the source for the plugin in a src folder in the root folder, and the demo in a demo-source folder. I would like to be able to build the plugin so that ends up in in the dist folder.
+
 
 ## This plugin vs a quick custom solution
 Grid based movement isn't very complicated (Move your sprite one step to the right: "sprite.x+=gridUnitWidth"). The purpose with this plugin is to do this in a stable way, allowing animations without resorting to tweens, collision detection, one-way-tiles, movable objects, turn-based time, path finding and loads of methods and properties tied to the grid physics body. It will be an asset for anyone doing a RPG, puzzle games (like "The adventures of Lolo" on NES or Sokoban), retro action rpg (like "Zelda" on NES), rouge like games, retro platformers (like Castlequest on MSX (minus gravity for now)) strategy and board games.
