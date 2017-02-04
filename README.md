@@ -3,12 +3,18 @@
 The Grid Physics plugin is to Arcade physics what Arcade physics is to Box2D. :-) This plugin adds support for grid/tile based movement along with some other stuff to make your life easier if you choose the path of grid restricted movement. My aim is to build the API as close as possible to Arcade physics.
 
 **Setup instructions** is in the end of this file.
+
 **Demo** is hosted here: http://metroid.niklasberg.se/gridPhysics/
 
-## Help wanted!
-I'm stuck at making a way to build stand-alone plugin for others to use. My idea is to keep developing the plugin as a part of the demo project. If possible I want the source for the plugin in a src folder in the root folder, and the demo in a demo-source folder. I would like to be able to build the plugin so that ends up in in the dist folder.
+**Discuss** by submitting issues here or on html5gamedevs.com: http://www.html5gamedevs.com/topic/28051-grid-physics-plugin/
+
+
+
+![screenshot](screenshot.png)<br>
+*Screenshot of the demo with path debugging enabled. The border of hill to the right is an example of tiles that is internally blocked.*
 
 ## Credits
+* @Samme for creating the brunch build configuration!
 * Project is based on Phaser-ES6-Webpack by Leandro Cabrera: https://github.com/lean/phaser-es6-webpack
 * Tileset and sprites: Dawnlike by DragonDePlatino, DawnBringer. http://opengameart.org/content/dawnlike-16x16-universal-rogue-like-tileset-v181
 * Hero sprite by Gazer: http://opengameart.org/content/overhead-action-rpg-characters
@@ -30,9 +36,10 @@ Grid based movement isn't very complicated (Move your sprite one step to the rig
    * Tile dimensions may differ from grid dimensions (but needs to be multiple of the grid dimensions, like 16x16 tiles on an 8x8 grid).
    * Collision detection against tiles with callback.
    * Tile collisions on specified directions only
+   * Tile collision: Block against leaving tile in any direction.
 * *Bodies (sprites):*
    * Body size is not restricted to grid-size, and different body sizes may co-exist (but must be equal or a multiple of grid dimensions. The sprite graphics may differ from body size.)
-   * Path finding (easystar.js dependency)
+   * Path finding (requires easystar.js)
    * Moveable objects (can be chained, i.e. the player push one crate against another crate that will also move).
    * Mass (and strength that limit total mass that can be pushed by the power of one sprite)
    * Velocity, ("struggle" property that can slow down a body based on mass pushed)
@@ -63,6 +70,7 @@ sprite.body.setVelocity(50, 0);
 ## Known annoying bugs
 * Pushing already moving bodies might cause unexpected results.
 * Pathfinding still struggles with one-way-tiles (but not always).
+* Tiles with internal blocks isn't compatible with current pathfinding implementation.
 * Turn-based time wont work with more than two entities. :-O
 
 ## Future features
@@ -100,55 +108,24 @@ Depending on the interest I may add extra features. Some of the features is quic
    * Trying to go x,y simulanously - If x wont work, try y.
    * forcedMovement (being pushed overrides the the desired velocioty of the object)
 
-## Setup
-This section is a slightly modified copy from phaser-es6-webpack. You'll to install a few things before you have a working copy of the project.
 
-### 1. Clone this repo:
+## Getting started:
+
+**Clone this repo:**<br>
 Navigate into your workspace directory.
 Run:
-``` git clone https://github.com/nkholski/grid-physics ```
+`git clone https://github.com/nkholski/grid-physics`
 
+**Install dependencies (if you don't have them):**
+* [Node.js](http://nodejs.org): `brew install node` on OS X
+* [Brunch](http://brunch.io): `npm install -g brunch`
+* Brunch plugins and app dependencies: `npm install`
 
-###2. Install node.js and npm:
-https://nodejs.org/en/
+**Running the demo:**<br>
+`brunch watch --server` — watches the project with continuous rebuild. This will also launch HTTP server with [pushState](https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history). The local url will be http://localhost:3333/demo/
 
-
-### 3. Install dependencies:
-   Navigate to the cloned repo’s directory.
-
-   Run:
-
-   ```npm install```
-
-### 4. Run the development server (demo):
-
-   Run:
-
-   ```npm run dev```
-
-   This will run a server so you can run the game in a browser.
-
-   Open your browser and enter localhost:3000 into the address bar.
-
-   Also this will start a watch process, so you can change the source and the process will recompile and refresh the browser
-
-
-### 5. Build demo:
-
-   Run:
-
-   ```npm run deploy```
-
-   This will optimize and minimize the compiled bundle.
-
-### 6. Build plugin:
-
-   Run:
-
-  ```npm run deploy```
-
-  This is not working ATM :-(.
-
+**Buildning the plugin (and demo):**<br>
+`brunch build --production` — builds minified project for production in the dist folder, both the demo and the plugin. The filename of the plugin is "gridPhysics.js".
 
 ## API Documentation
 Not yet. To much is in flux.

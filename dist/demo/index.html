@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Phaser Grid Physics Plugin: Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta http-equiv="cleartype" content="on">
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+      }
+      canvas{
+        cursor: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="content"></div>
+    <div id="instructions">Demo with a gridsize of 8x8 pixels, 16x16 pixel hero and tiles, one 24x24
+      and one 32x32 pixel object.
+      <br>User arrow keys to move.
+      <br>Things to do: Use mouse or touch for pathfinding (all objects will block
+      the player and one-directional collision tiles support is kind of buggy).
+      Push objects on each other. Walk or push things into one way directional
+      tiles. Toggle turnbased mode. Explore the Hero properties.
+      <ul>
+        <li>Strength - Max mass you can push (most boxes have mass 1, those with a
+          2 has 2 in mass and the biggest one has 4)</li>
+        <li>MaxCue - Max number of objects you can push</li>
+        <li>Struggle - Slowdown by this factor multiplied with total mass when pushing</li>
+        <li>Velocity - Pixels per second</li>
+        <li>Steps - Number of total steps taken</li>
+      </ul>
+    </div>
+    <script src="vendor.js"></script>
+    <script src="../gridPhysics.js"></script>
+    <script src="demo.js"></script>
+    <script>require('demo/main');</script>
+  </body>
+
+</html>
