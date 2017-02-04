@@ -1,7 +1,7 @@
 {
   "name": "phaser-grid-physics-plugin",
-  "description": "Description",
-  "author": "Your Name",
+  "description": "The Grid Physics plugin is to Arcade physics what Arcade physics is to Box2D.",
+  "author": "Niklas Berg",
   "version": "0.1.0",
   "repository": {
     "type": "git",
