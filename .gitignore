@@ -33,3 +33,5 @@ bower_components/
 
 # You'll have to build the demo yourself
 dist/demo
+
+analytics.js

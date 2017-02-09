@@ -20,10 +20,12 @@ class GameState extends Phaser.State {
         let map = game.map;
         this.map = map; // wierd: game.map, map and this.map. FIX
 
+        game.physics.gridPhysics.enable(map);
+
+
         map.addTilesetImage('basictiles');
         let layer = map.createLayer("ground");
         layer = map.createLayer("onGround");
-        game.physics.gridPhysics.enable(layer);
 
         for (let y = 0; y < layer.layer.data.length; y++) {
             for (let x = 0; x < layer.layer.data[y].length; x++) {
@@ -32,11 +34,7 @@ class GameState extends Phaser.State {
                     continue;
                 }
                 for (let property of Object.keys(tile.properties)) {
-                    if (tile.hasOwnProperty(property) || property.indexOf("blocked") === 0 ) {
-                        if(property.indexOf("blocked")>-1){
-                          console.log("blocked"+property);
-                        }
-
+                    if (tile.hasOwnProperty(property) || property.indexOf("border") === 0 ) {
                         tile[property] = tile.properties[property];
                     }
                 }
@@ -47,7 +45,9 @@ class GameState extends Phaser.State {
                 }
             }
         }
-        layer.updateBlocked();
+        game.physics.gridPhysics.enable(layer);
+
+        layer.updateBorders();
 
 
         layer.resizeWorld();
@@ -154,8 +154,8 @@ class GameState extends Phaser.State {
             this.physics.nextTurn(hero.body);
         }
 
-        game.marker.x = 8 * Math.round(game.input.activePointer.x / 8);
-        game.marker.y = 8 * Math.round(game.input.activePointer.y / 8);
+        game.marker.x = 8 * Math.round((game.input.activePointer.x-8) / 8);
+        game.marker.y = 8 * Math.round((game.input.activePointer.y-8) / 8);
 
         let anim = "";
         switch (hero.body.facing) {
@@ -186,7 +186,7 @@ class GameState extends Phaser.State {
         let vel = game.hero.body.baseVelocity;
 
         if (game.input.activePointer.isDown) {
-            hero.body.moveToPixelXY(game.input.activePointer.x, game.input.activePointer.y, vel);
+            hero.body.moveToPixelXY(game.input.activePointer.x-8, game.input.activePointer.y-8, vel);
         }
 
         if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT)) {

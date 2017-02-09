@@ -151,7 +151,7 @@
              active: false,
              path: [],
              next: null,
-             recalc: 0 // 0 - never, 1 - if collision, 2 - each step
+             recalc: 0 // 0 - never, 1 - if collision, 2 - each step (not impleneted yet)
          };
 
 
@@ -304,19 +304,19 @@
 
                      // Prevents bodies to walk with path of body outside of blocked tile side
                      if (dx != 0) {
-                         if (tile.blockedUp && position.y < tile.y * tileRatio.y) {
+                         if (tile.borderUp && position.y < tile.y * tileRatio.y) {
                              collide = true;
                              break;
-                         } else if (tile.blockedDown && position.y + height > tile.y * tileRatio.y) {
+                         } else if (tile.borderDown && position.y + height > tile.y * tileRatio.y) {
                              collide = true;
                              break;
                          }
                      }
                      if (dy != 0) {
-                         if (tile.blockedLeft && position.x < tile.x * tileRatio.x) {
+                         if (tile.borderLeft && position.x < tile.x * tileRatio.x) {
                              collide = true;
                              break;
-                         } else if (tile.blockedRight && position.x + width > tile.x * tileRatio.x) {
+                         } else if (tile.borderRight && position.x + width > tile.x * tileRatio.x) {
                              collide = true;
                              break;
                          }

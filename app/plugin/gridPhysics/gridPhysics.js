@@ -28,7 +28,12 @@ class GridPhysics extends Phaser.Plugin {
         // Collidable tilemap layers
         this.tilemaplayers = [];
 
+        this.tileGridRatio = new Phaser.Point(-1, -1);
+        console.log(this.tileGridRatio);
         this._pushChain = [];
+
+
+        this.map = null;
 
         //
         this.game.physics.gridPhysics = this;
@@ -74,34 +79,50 @@ class GridPhysics extends Phaser.Plugin {
                 break;
             case Phaser.TILEMAPLAYER:
                 this.tilemaplayers.push(entity);
-                entity.updateBlocked = this.updateBlocked.bind(entity);
+                console.log(entity);
+
+                if (this.tileGridRatio.x === -1) {
+                    this.tileGridRatio.set(
+                        entity.collisionWidth / this.gridSize.x,
+                        entity.collisionHeight / this.gridSize.y
+                    );
+                }
+
+                this.addToLayerToCollision(entity);
+                entity.updateBorders = this.updateBorders.bind(entity);
+                break;
+            default: // Phaser.TILEMAP????
+                if (entity.hasOwnProperty) {
+                    this.map = entity;
+                }
+                //            debugger;
                 break;
         }
     }
 
-    updateBlocked() {
-      console.log("UPDATE BLOCKED")
+    updateBorders() {
+        console.log("UPDATE BLOCKED")
         let data = this.layer.data;
         for (let y = 0; y < data.length; y++) {
-            console.log("y"+y);
+            console.log("y" + y);
             for (let x = 0; x < data[y].length; x++) {
-              let tile = data[y][x];
-              if(tile.blockedUp){
-                tile.collideUp = true;
-                data[y-1][x].collideDown = true;
-              }
-              if(tile.blockedDown){
-                tile.collideDown = true;
-                data[y+1][x].collideUp = true;
-              }
-              if(tile.blockedLeft){
-                tile.collideLeft = true;
-                data[y][x-1].collideRight = true;
-              }
-              if(tile.blockedRight){
-                tile.collideRight = true;
-                data[y][x+1].collideLeft = true;
-              }
+                let tile = data[y][x];
+                if (tile.borderUp) {
+                    tile.collideUp = true;
+                    data[y - 1][x].collideDown = true;
+                }
+                if (tile.borderDown) {
+                    tile.collideDown = true;
+                    data[y + 1][x].collideUp = true;
+                }
+                if (tile.borderLeft) {
+                    tile.collideLeft = true;
+                    data[y][x - 1].collideRight = true;
+                }
+                if (tile.borderRight) {
+                    tile.collideRight = true;
+                    data[y][x + 1].collideLeft = true;
+                }
             }
         }
     }
@@ -316,6 +337,81 @@ class GridPhysics extends Phaser.Plugin {
         graphics.endFill();
 
 
+    }
+
+    resetCollisionLayer() {
+        let map = this.map;
+        let colLayerIndex = map.getLayerIndex("gridPhysicsCollision");
+        let colTile, tile;
+        for (let x = 0; x < map.layers[colLayerIndex].width; x++) {
+            for (let y = 0; y < map.layers[colLayerIndex].height; y++) {
+                //console.log(collisionLayerName);
+                map.putTile(1, x, y, "gridPhysicsCollision");
+                colTile = map.getTile(x, y, "gridPhysicsCollision");
+                colTile.collideUp = false;
+                colTile.collideRight = false;
+                colTile.collideDown = false;
+                colTile.collideLeft = false;
+                //colTile.collides = false;
+            }
+        }
+    }
+
+    addToLayerToCollision(layer) {
+
+        let map = this.map;
+
+        let colLayerIndex = map.getLayerIndex("gridPhysicsCollision");
+        //let collisionLayer = null;
+        let colTile, tile;
+
+        if (!colLayerIndex) {
+            let collisionLayer = map.createBlankLayer("gridPhysicsCollision", map.width, map.height, map.tileWidth, map.tileHeight);
+            colLayerIndex = map.getLayerIndex("gridPhysicsCollision");
+            collisionLayer.visible = false;
+            this.resetCollisionLayer();
+        }
+        // Prepare the collision layer
+
+        // Loop tiles for collision and add to collision layer
+
+        for (let x = 0; x < layer.width; x++) {
+            for (let y = 0; y < layer.height; y++) {
+                //console.log(x+"  "+y)
+                tile = map.getTile(x, y, layer.index);
+                if (!tile) {
+                    continue;
+                }
+                colTile = map.getTile(x, y, "gridPhysicsCollision");
+                colTile.collideUp = tile.collideUp ? true : colTile.collideUp;
+                colTile.collideRight = tile.collideRight ? true : colTile.collideRight;
+                colTile.collideDown = tile.collideDown ? true : colTile.collideDown;
+                colTile.collideLeft = tile.collideLeft ? true : colTile.collideLeft;
+                //colTile.collides = tile.collides ? true : colTile.collides;*/
+
+                    console.log("TILE", colTile);
+
+            }
+        }
+
+        // Set all non-collision tiles to null (save some ram and probably perfomance)
+        /*for (var x = 0; x < map.layers[colLayerIndex].width; x++) {
+            for (var y = 0; y < map.layers[colLayerIndex].height; y++) {
+                colTile = map.getTile(x, y, collisionLayerName);
+                if (!colTile.collideUp && !colTile.collideDown && !colTile.collideLeft && !colTile.collideRight) {
+                    map.putTile(null, x, y, collisionLayerName);
+                }
+            }
+        }*/
+
+        // Build collision grid for pathfinding!
+
+
+        // Fix faces - Not used by GridPhysics ATM, but could be nice for visual debugging
+        map.calculateFaces(colLayerIndex);
+
+        //return collisionLayer ? collisionLayer : null;
+        console.log(map.layers[colLayerIndex]);
     }
 }
 
