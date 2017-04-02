@@ -2,6 +2,8 @@
 
 The Grid Physics plugin is to Arcade physics what Arcade physics is to Box2D. :-) This plugin adds support for grid/tile based movement along with some other stuff to make your life easier if you choose the path of grid restricted movement. My aim is to build the API as close as possible to Arcade physics.
 
+**Status:** The development is put on hold and will be ported to Phaser 3 when it's released. My plan is to create a RPG with the plugin and I prefer a delay over being stuck with Phaser 2. (Don't get me wrong. Phaser 2 is great but for a long-term project I prefer to wait.) **However:** the plugin will work great for a lot of projects in it's present form (read the "known annoyning bugs"-section). I will also accept PRs.
+
 **Setup instructions** is in the end of this file.
 
 **Demo** is hosted here: http://metroid.niklasberg.se/gridPhysics/
