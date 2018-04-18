@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Animated Tiles Example</title>
+    <title>Grid Physics Example</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <meta name="HandheldFriendly" content="True">
     <meta name="MobileOptimized" content="320">
@@ -19,17 +19,26 @@
 </head>
 
 <body>
-    <script src="../node_modules/phaser/dist/phaser.js"></script>
-    <script src="../dist/GridPhysics.js"></script>
-    <script src="../node_modules/dat.gui/build/dat.gui.js"></script>
-    <script src="./dat.gui.controls.js"></script>
-    <script src="./game.js"></script>
+    <script src="./js/dat.gui.controls.js"></script>
+   
     <div style="max-width: 50%">
         Please note that dat.gui isn't perfectly configured. The global rate settings might be the most confusing part. By changing
         it you pass down rates to all maps and tilesettings, but the gui won't update if you change rates on a specified
         map and the visible number will be irrelevant until changed next time.<br>
         Github: <a href="https://github.com/nkholski/phaser-animated-tiles">https://github.com/nkholski/phaser-animated-tiles</a>
     </div>
+    <script>
+   /*     document.addEventListener("DOMContentLoaded", function() {
+            var tag = document.createElement("script");
+        tag.src = "js/game.js";
+        document.getElementsByTagName("head")[0].appendChild(tag);
+        });
+
+
+    */
+    
+    </script>
+
 </body>
 
 

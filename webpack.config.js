@@ -5,7 +5,7 @@ const path = require('path');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
-    watch: true,
+    watch: false,
     context: `${__dirname}/src/`,
 
     entry: {
