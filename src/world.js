@@ -421,7 +421,6 @@ export default class World {
 
         // Build collision grid for pathfinding!
 
-
         // Fix faces - Not used by GridPhysics ATM, but could be nice for visual debugging
       //  map.calculateFaces(colLayerIndex);
 

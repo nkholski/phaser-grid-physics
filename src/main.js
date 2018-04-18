@@ -10,14 +10,12 @@
 
 import World from './world';
 
-
 class GridPhysics {
     /*
 
     TODO: 
     1. Fix property names which is a mess after adding support for multiple maps, tilesets and layers.
     2. Helper functions: Get mapIndex by passing a map (and maybe support it as argument to methods), Get layerIndex, get tile index from properties.
-    
     */
     constructor(scene) {
         Phaser.Physics.GridPhysics = this;

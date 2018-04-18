@@ -103,7 +103,6 @@ var GridPhysics = function () {
      TODO: 
     1. Fix property names which is a mess after adding support for multiple maps, tilesets and layers.
     2. Helper functions: Get mapIndex by passing a map (and maybe support it as argument to methods), Get layerIndex, get tile index from properties.
-    
     */
     function GridPhysics(scene) {
         _classCallCheck(this, GridPhysics);
@@ -1034,7 +1033,6 @@ var World = function () {
             }*/
 
             // Build collision grid for pathfinding!
-
 
             // Fix faces - Not used by GridPhysics ATM, but could be nice for visual debugging
             //  map.calculateFaces(colLayerIndex);
