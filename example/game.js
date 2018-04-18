@@ -57,8 +57,7 @@ function create ()
         tile.borderRight = p.borderRight ? true : false;
         tile.borderDown = p.borderDown ? true : false;
         tile.borderLeft = p.borderLeft ? true : false;
-        console.log(map.tilesets[0].tileProperties[tile.index]);
-        console.log(tile);
+    
 
 
     }));
@@ -123,23 +122,18 @@ function create ()
         crate.play("crate");
         this.gridPhysics.world.enable(crate);
     }*/
-    this.crate = this.add.sprite(64, 0);
-    this.crate.originX = 0;
-    this.crate.originY = 0;
-    this.crate.play("crate");
-    this.gridPhysics.world.enable(this.crate);
+    
    // this.crate.body.setVelocity(0,0);
 
 //console.log(map.objects);
-
+console.log("!!!");
    for (let crateObj of map.objects[0].objects) {
-    console.log(crateObj);  
     let anim = "box"
     if (crateObj.properties && crateObj.properties.box) {
         anim += crateObj.properties.box;
     }
 
-    let crate = this.add.sprite(crateObj.x, crateObj.y);
+    let crate = this.add.sprite(crateObj.x, crateObj.y-16);
     crate.originX = 0;
     crate.originY = 0;
     //console.log(crateObj.properties.scale);
