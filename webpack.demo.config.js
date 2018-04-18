@@ -21,7 +21,7 @@ module.exports = {
             'babel-polyfill',
             path.resolve(__dirname, 'example/js/game.js')
         ],
-      //  vendor: ['phaser']  
+        vendor: ['phaser', 'dat.gui']  
     },
     devtool: 'cheap-source-map',
     output: {

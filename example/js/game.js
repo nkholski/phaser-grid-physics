@@ -1,5 +1,9 @@
 import "phaser";
+import dat from 'dat.gui';
+import debugGUI from './debugGUI';
+
 //import GridPhysics from "./gridPhysics";
+
 var config = {
     type: Phaser.WEBGL,
     width: 25*16,
@@ -111,6 +115,8 @@ function create ()
     
     player = this.player;
     this.gridPhysics.world.enable(this.player);
+    this.player.body.baseVelocity = 50;
+
     this.player.body.strength = 112;
     this.player.body.collideWorldBounds = true;
 
@@ -171,6 +177,12 @@ console.log("!!!");
         right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT),
         down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN),
       };
+
+
+      if (!this.debugGUI) {
+        this.debugGUI = new debugGUI();
+    }
+    this.debugGUI.setupGUI(this)
 }
 
 
