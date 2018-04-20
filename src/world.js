@@ -79,13 +79,6 @@ export default class World {
                 }
                 this.updateBorders(entity);
                 return;
-                if(!this.map) {
-                    this.map = entity.tilemap;
-                }
-                this.addToLayerToCollision(entity);
-                console.log("dasda",enity.tilemap);
-                entity.updateBorders = this.updateBorders.bind(entity);
-                break;
             default: // Phaser.TILEMAP????
                 if (entity.hasOwnProperty) {
                     this.map = entity;

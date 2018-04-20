@@ -1,7 +1,7 @@
  /*jshint esversion: 6 */
 
 
- class gridBody {
+ class GridBody {
      constructor(sprite) {
          /**
           * @property {Phaser.Sprite} sprite - Reference to the parent Sprite.
@@ -12,7 +12,10 @@
          /**
           * @property {Phaser.Game} world - Local reference to the grid physics world.
           */
-        this.world = Phaser.Physics.GridPhysics.world;
+         this.world = Phaser.Physics.GridPhysics.world;
+
+
+        this.tilemap = Phaser.Physics.GridPhysics.tilemap;
 
          // UNDECIDED:
          /**
@@ -49,13 +52,13 @@
          /**
           * @property {Phaser.Point} velocity - The velocity, or rate of change in speed of the Body. Measured in pixels per second.
           */
-         this.velocity = new Phaser.Geom.Point(0,0);
+         this.velocity = new Phaser.Geom.Point(0, 0);
 
          /**
           * @property {Phaser.Point} _desiredVelocity - Velocity the entity strives to get.
           * @readonly
           */
-         this._desiredVelocity = new Phaser.Geom.Point(0,0);
+         this._desiredVelocity = new Phaser.Geom.Point(0, 0);
 
          // TODO:
          /**
@@ -241,152 +244,6 @@
          this.sprite.y = this.world.gridSize.y * this.gridPosition.y;
      }
 
-     collideTilemap(dx, dy, slide = false) {
-         let position = {
-             x: this.gridPosition.x + dx,
-             y: this.gridPosition.y + dy
-         };
-         let width = this.width;
-         let height = this.height;
-         if (dx !== 0) {
-             width = 1;
-             if (dx > 0) {
-                 position.x += this.width - 1;
-             }
-         } else {
-             if (dy !== 0) {
-                 height = 1;
-                 if (dy > 0) {
-                     position.y += this.height - 1;
-                 }
-             }
-         }
-         let tileRatio = {
-             x: 2,
-             y: 2
-         }
-         for (let x = position.x; x < position.x + width; x++) {
-             for (let y = position.y; y < position.y + height; y++) {
-                 let collide = false;
-                 for (let layer of this.world.tilemaplayers) {
-                     //let tile = this.world.map.getTileAt(Math.floor(x * this.world.gridSize.x / layer.collisionWidth), Math.floor(y * this.world.gridSize.y / layer.collisionHeight), layer, true);
-                        layer.collisionHeight = 16;
-                        layer.collisionWidth = 16;
-                        //let tile = this.world.getTileAt(Math.floor(x * this.world.gridSize.x / layer.collisionWidth), Math.floor(y * this.world.gridSize.y / layer.collisionHeight), layer, true);
-                        //debugger;
-                        let checkY = Math.floor(y * this.world.gridSize.y / layer.collisionHeight);
-                        let checkX;
-                        if(checkY<0 || checkY>layer.layer.data.length-1){
-                            if(this.collideWorldBounds){
-                                return true;
-                            }
-                            else {
-                                continue;
-                            }
-                        }
-                        else {
-                            checkX = Math.floor(x * this.world.gridSize.x / layer.collisionWidth);
-                            if(checkX<0 || checkY>layer.layer.data[checkY].length-1){
-                                if(this.collideWorldBounds){
-                                    return true;
-                                }
-                                else {
-                                    continue;
-                                }
-                            }
-                        }
-
-
-                         let tile = layer.layer.data[checkY][checkX];
-                 
-                     if (tile === null || tile.index === -1) { // No tile, or empty - OK
-                         continue;
-                     }
-
-                     if (tile.collideRight && tile.collideLeft && tile.collideDown && tile.collideUp) { // tile collides whatever direction the body enter
-                         collide = true;
-                         break;
-                     } else if (dx < 0 && tile.collideRight) { // moving left and the tile collides from the right
-                        console.log("Collide RIGHT", tile)
-                         collide = true;
-                         break;
-                     } else if (dx > 0 && tile.collideLeft) {
-                        console.log("Collide KEFT", tile)
-                         collide = true;
-                         break;
-                     }
-                     if (dy < 0 && tile.collideDown) {
-                        console.log("Collide DOWN", tile)
-                         collide = true;
-                         break;
-                     } else if (dy > 0 && tile.collideUp) {
-                         console.log("Collide UP", tile)
-                         collide = true;
-                         break;
-                     }
-
-                     // Prevents bodies to walk with path of body outside of blocked tile side
-                     if (dx != 0) {
-                         if (tile.borderUp && position.y < tile.y * tileRatio.y) {
-                             collide = true;
-                             break;
-                         } else if (tile.borderDown && position.y + height > tile.y * tileRatio.y) {
-                             collide = true;
-                             break;
-                         }
-                     }
-                     if (dy != 0) {
-                         if (tile.borderLeft && position.x < tile.x * tileRatio.x) {
-                             collide = true;
-                             break;
-                         } else if (tile.borderRight && position.x + width > tile.x * tileRatio.x) {
-                             collide = true;
-                             break;
-                         }
-                     }
-
-                 }
-                 if (collide) {
-                     if (slide) { // Left-over from previous working version, needs review...
-                         if (dx !== 0) {
-                             if (!this.collideTilemap(dx, dy - 1)) {
-                                 return {
-                                     dx,
-                                     dy: dy - 1
-                                 };
-                             } else if (!this.collideTilemap(dx, dy + 1)) {
-                                 return {
-                                     dx,
-                                     dy: dy + 1
-                                 };
-                             }
-                         }
-                         if (dy !== 0) {
-                             if (!this.collideTilemap(dx - 1, dy)) {
-                                 return {
-                                     dx: dx - 1,
-                                     dy
-                                 };
-                             } else if (!this.collideTilemap(dx + 1, dy)) {
-                                 return {
-                                     dx: dx + 1,
-                                     dy
-                                 };
-                             }
-                         }
-                     }
-                     return {
-                         dx: 0,
-                         dy: 0
-                     };
-                 }
-             }
-         }
-         return false;
-     }
-
-
-
      setVelocity(x, y = null) {
          // longpress is not yet implemented
          y = y !== null ? y : x;
@@ -409,11 +266,11 @@
              r2.y + r2.height <= r1.y);
      }
 
-     testMove(dx, dy) {     
+     testMove(dx, dy) {
          if (!this.collidable) {
              return true;
          }
-         if (this.collideTilemap(dx, dy)) {
+         if (this.tilemap.collide(this.sprite,dx, dy)) {
              return false;
          }
          // Kolla först tilemap för det kan bli krock direkt!
@@ -650,162 +507,162 @@
  }
  */
 
-    /* moveToPixelXY(x, y, speed = 60, maxTime = 0, active = true) {
-         x = Math.round(x / this.world.gridSize.x);
-         y = Math.round(y / this.world.gridSize.y);
-         this.moveToXY(x, y, speed, maxTime, active);
-     }*/
+     /* moveToPixelXY(x, y, speed = 60, maxTime = 0, active = true) {
+          x = Math.round(x / this.world.gridSize.x);
+          y = Math.round(y / this.world.gridSize.y);
+          this.moveToXY(x, y, speed, maxTime, active);
+      }*/
 
-    /* moveToXY(x, y, speed = 60, maxTime = 0, active = true) {
-         /*
-           Yes, I know that this is ridiculously inefficient rebuilding the grid from the tilemap
-           on each call without any cache, and trying to find the path of the full current map
-           even if it's not necessarily in most cases.
+     /* moveToXY(x, y, speed = 60, maxTime = 0, active = true) {
+          /*
+            Yes, I know that this is ridiculously inefficient rebuilding the grid from the tilemap
+            on each call without any cache, and trying to find the path of the full current map
+            even if it's not necessarily in most cases.
 
-           It's also still buggy. Different bodysizes and stuff is a challenge, and now
-           the body size is locked to 2x2 of the grid size.
+            It's also still buggy. Different bodysizes and stuff is a challenge, and now
+            the body size is locked to 2x2 of the grid size.
 
-           And, also it just checks the first tilemap layer for collision even if you added more.
+            And, also it just checks the first tilemap layer for collision even if you added more.
 
-         * /
-
-
-         if (typeof(EasyStar) === 'undefined') {
-             console.error("Grid Physics error: Easystar.js must be enabled!");
-             return;
-         }
-         if (this.physics.render.path || this.physics.render.pathCollision) {
-             this.physics.resetDebugRenderer();
-         }
-
-         let easystar = new EasyStar.js();
-
-         // Generate array
-         // Respond
-         let grid = [];
-         let i = 0;
-         let tileRatio = {
-             x: this.physics.tilemaplayers[0].layer.data[0][0].width / game.physics.gridPhysics.gridSize.x,
-             y: this.physics.tilemaplayers[0].layer.data[0][0].height / game.physics.gridPhysics.gridSize.y
-         };
-         for (let row of this.physics.tilemaplayers[0].layer.data) {
-             grid[i] = [];
-             grid[i + 1] = [];
-             for (let tile of row) {
-                 if (tile.collideUp && tile.collideDown && tile.collideLeft && tile.collideRight) { // ¦¦ --> && när conditional
-                     for (let dy = 0; dy < tileRatio.y; dy++) {
-                         for (let dx = 0; dx < tileRatio.x; dx++) {
-                             grid[i + dx].push(1);
-                         }
-                     }
-                 } else if (tile.collideUp || tile.collideDown || tile.collideLeft || tile.collideRight) {
-                     for (let dy = 0; dy < tileRatio.y; dy++) {
-                         for (let dx = 0; dx < tileRatio.x; dx++) {
-                             grid[i + dx].push(4);
-                         }
-                     }
-                 } else {
-                     for (let dy = 0; dy < tileRatio.y; dy++) {
-                         for (let dx = 0; dx < tileRatio.x; dx++) {
-                             grid[i + dx].push(0);
-                         }
-                     }
-                 }
-             }
-             //i++;
-             i += tileRatio.y;
-         }
-
-         // Bodies
-         for (let body of this.physics.bodies) {
-             if (body === this) {
-                 continue;
-             }
-             for (let x = 0; x < body.width; x++) {
-                 for (let y = 0; y < body.height; y++) {
-                     grid[body.gridPosition.y + y][body.gridPosition.x + x] = 3;
-
-                 }
-             }
-         }
+          * /
 
 
+          if (typeof(EasyStar) === 'undefined') {
+              console.error("Grid Physics error: Easystar.js must be enabled!");
+              return;
+          }
+          if (this.physics.render.path || this.physics.render.pathCollision) {
+              this.physics.resetDebugRenderer();
+          }
 
+          let easystar = new EasyStar.js();
 
-         // Smalare korridorer
-         for (let y = 0; y < grid.length; y++) {
+          // Generate array
+          // Respond
+          let grid = [];
+          let i = 0;
+          let tileRatio = {
+              x: this.physics.tilemaplayers[0].layer.data[0][0].width / game.physics.gridPhysics.gridSize.x,
+              y: this.physics.tilemaplayers[0].layer.data[0][0].height / game.physics.gridPhysics.gridSize.y
+          };
+          for (let row of this.physics.tilemaplayers[0].layer.data) {
+              grid[i] = [];
+              grid[i + 1] = [];
+              for (let tile of row) {
+                  if (tile.collideUp && tile.collideDown && tile.collideLeft && tile.collideRight) { // ¦¦ --> && när conditional
+                      for (let dy = 0; dy < tileRatio.y; dy++) {
+                          for (let dx = 0; dx < tileRatio.x; dx++) {
+                              grid[i + dx].push(1);
+                          }
+                      }
+                  } else if (tile.collideUp || tile.collideDown || tile.collideLeft || tile.collideRight) {
+                      for (let dy = 0; dy < tileRatio.y; dy++) {
+                          for (let dx = 0; dx < tileRatio.x; dx++) {
+                              grid[i + dx].push(4);
+                          }
+                      }
+                  } else {
+                      for (let dy = 0; dy < tileRatio.y; dy++) {
+                          for (let dx = 0; dx < tileRatio.x; dx++) {
+                              grid[i + dx].push(0);
+                          }
+                      }
+                  }
+              }
+              //i++;
+              i += tileRatio.y;
+          }
 
-             for (let x = 0; x < grid[0].length; x++) {
-                 if (x > 0 && grid[y][x] > 0 && grid[y][x] < 4) {
-                     if (grid[y][x - 1] == 0 || grid[y][x - 1] == 4) {
-                         grid[y][x - 1] = 2;
-                     }
-                     if (y > 0 && grid[y - 1][x] == 0 || grid[y][x - 1] == 4) {
-                         grid[y - 1][x] = 2;
-                     }
-                     if (x > 0 && y > 0 && grid[y - 1][x - 1] == 0 || grid[y][x - 1] == 4) {
-                         grid[y - 1][x - 1] = 2;
-                     }
-                 }
-             }
+          // Bodies
+          for (let body of this.physics.bodies) {
+              if (body === this) {
+                  continue;
+              }
+              for (let x = 0; x < body.width; x++) {
+                  for (let y = 0; y < body.height; y++) {
+                      grid[body.gridPosition.y + y][body.gridPosition.x + x] = 3;
 
-         }
-
-
-         //debugger;
-         //        console.warn(grid);
-
-         this.physics.renderPathCollision(grid);
+                  }
+              }
+          }
 
 
 
-         easystar.setGrid(grid);
+
+          // Smalare korridorer
+          for (let y = 0; y < grid.length; y++) {
+
+              for (let x = 0; x < grid[0].length; x++) {
+                  if (x > 0 && grid[y][x] > 0 && grid[y][x] < 4) {
+                      if (grid[y][x - 1] == 0 || grid[y][x - 1] == 4) {
+                          grid[y][x - 1] = 2;
+                      }
+                      if (y > 0 && grid[y - 1][x] == 0 || grid[y][x - 1] == 4) {
+                          grid[y - 1][x] = 2;
+                      }
+                      if (x > 0 && y > 0 && grid[y - 1][x - 1] == 0 || grid[y][x - 1] == 4) {
+                          grid[y - 1][x - 1] = 2;
+                      }
+                  }
+              }
+
+          }
 
 
-         // Directional condition
-         for (let y = 0; y < grid.length; y++) {
-             for (let x = 0; x < grid[0].length; x++) {
+          //debugger;
+          //        console.warn(grid);
 
-                 if (grid[y][x] === 4) {
-                     let tile = this.physics.tilemaplayers[0].layer.data[Math.round(y / 2)][Math.round(x / 2)];
-                     let paths = []; //;
-                     if (!tile.collideUp) {
-                         paths.push(EasyStar.BOTTOM);
-                     }
-                     if (!tile.collideRight) {
-                         paths.push(EasyStar.LEFT);
-                     }
-                     if (!tile.collideDown) {
-                         paths.push(EasyStar.TOP);
-                     }
-                     if (!tile.collideLeft) {
-                         paths.push(EasyStar.RIGHT);
-                     }
-                     grid[y][x] = 0;
-                     easystar.setDirectionalCondition(x, y, paths);
-                 }
-             }
-         }
+          this.physics.renderPathCollision(grid);
 
-         easystar.setAcceptableTiles([0, 4]);
 
-         easystar.findPath(this.gridPosition.x, this.gridPosition.y, x, y, (path) => {
-             if (path === null) {
-                 //console.log("Path was not found.");
-             } else if (path.length > 0) {
-                 //    console.log("Path was found. The first Point is " + path[1].x + " " + path[1].y, this);
-                 this.moveTo = {
-                     active: true,
-                     path,
-                     next: 1,
-                     velocity: speed,
-                     recalc: 0
-                 };
-                 this.physics.renderPath(this.moveTo.path);
 
-                 /*this.moveTo.x =
-                 this.moveTo.y = path[1].y*2;*/
-                 /*  if (x < this.gridPosition.x) {
+          easystar.setGrid(grid);
+
+
+          // Directional condition
+          for (let y = 0; y < grid.length; y++) {
+              for (let x = 0; x < grid[0].length; x++) {
+
+                  if (grid[y][x] === 4) {
+                      let tile = this.physics.tilemaplayers[0].layer.data[Math.round(y / 2)][Math.round(x / 2)];
+                      let paths = []; //;
+                      if (!tile.collideUp) {
+                          paths.push(EasyStar.BOTTOM);
+                      }
+                      if (!tile.collideRight) {
+                          paths.push(EasyStar.LEFT);
+                      }
+                      if (!tile.collideDown) {
+                          paths.push(EasyStar.TOP);
+                      }
+                      if (!tile.collideLeft) {
+                          paths.push(EasyStar.RIGHT);
+                      }
+                      grid[y][x] = 0;
+                      easystar.setDirectionalCondition(x, y, paths);
+                  }
+              }
+          }
+
+          easystar.setAcceptableTiles([0, 4]);
+
+          easystar.findPath(this.gridPosition.x, this.gridPosition.y, x, y, (path) => {
+              if (path === null) {
+                  //console.log("Path was not found.");
+              } else if (path.length > 0) {
+                  //    console.log("Path was found. The first Point is " + path[1].x + " " + path[1].y, this);
+                  this.moveTo = {
+                      active: true,
+                      path,
+                      next: 1,
+                      velocity: speed,
+                      recalc: 0
+                  };
+                  this.physics.renderPath(this.moveTo.path);
+
+                  /*this.moveTo.x =
+                  this.moveTo.y = path[1].y*2;*/
+     /*  if (x < this.gridPosition.x) {
                      //  this.setVelocity(-speed, 0);
                        this.moveTo.x = -1;
                    }
@@ -831,4 +688,4 @@
  }
 
 
- export default gridBody;
+ export default GridBody;
