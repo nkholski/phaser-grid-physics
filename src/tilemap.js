@@ -6,15 +6,18 @@ class Tilemap {
 
     }
 
-    collide(source, dx, dy, slide = false) {
-        let position, width, height;
+    collide(source, dx = 0, dy = 0, layers = this.world.tilemaplayers, slide = false) {
+        let position, width, height, collideWorldBounds;
+
+        // Sort out variables to work with, either from a sprite with a body or just an object
         if (source.hasOwnProperty("body")) {
             position = {
-                x: source.body.gridPosition.x + dx,
-                y: source.body.gridPosition.y + dy
+                x: source.body.gridPosition.x,
+                y: source.body.gridPosition.y
             };
             width = source.body.width;
             height = source.body.height;
+            collideWorldBounds = source.body.collideWorldBounds;
         } else {
             position = {
                 x: source.x,
@@ -22,9 +25,22 @@ class Tilemap {
             };
             width = source.width;
             height = source.height;
+            collideWorldBounds = source.hasOwnProperty("collideWorldBounds") ? source.collideWorldBounds : false;
         }
-        console.log(position, width, height, dx, dy);
+        // Prevent goint outside the tilemap?
+        if (collideWorldBounds &&
+            (position.x + dx < 0 ||
+            position.y + dy < 0 ||
+            position.x + dx + width > (this.world.tilemaplayers[0].width / this.world.gridSize.x) ||
+            position.y + dy + height > (this.world.tilemaplayers[0].height / this.world.gridSize.y))) {
+            return true;
+        }
 
+        // Update the position to the attempted movement
+        position.x += dx;
+        position.y += dy;
+
+        // Slim the body to prevent unnecessary collision checks (not that the physics are particulary demanding but anyway)
         if (dx !== 0) {
             if (dx > 0) {
                 position.x += width - 1;
@@ -79,20 +95,20 @@ class Tilemap {
                         collide = true;
                         break;
                     } else if (dx < 0 && tile.collideRight) { // moving left and the tile collides from the right
-                        console.log("Collide RIGHT", tile)
+                        //console.log("Collide RIGHT", tile)
                         collide = true;
                         break;
                     } else if (dx > 0 && tile.collideLeft) {
-                        console.log("Collide KEFT", tile)
+                        //console.log("Collide KEFT", tile)
                         collide = true;
                         break;
                     }
                     if (dy < 0 && tile.collideDown) {
-                        console.log("Collide DOWN", tile)
+                        //console.log("Collide DOWN", tile)
                         collide = true;
                         break;
                     } else if (dy > 0 && tile.collideUp) {
-                        console.log("Collide UP", tile)
+                        //console.log("Collide UP", tile)
                         collide = true;
                         break;
                     }

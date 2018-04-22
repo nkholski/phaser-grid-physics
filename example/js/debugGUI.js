@@ -15,6 +15,8 @@ class debugGUI extends dat.GUI {
         this.heroFolder.add(that.player.body, 'pushLimit', -1, 10).step(1).name('MaxCue');
         this.heroFolder.add(that.player.body, 'struggle', 0, 10).step(1).name('Struggle');
         this.heroFolder.add(that.player.body, 'baseVelocity', 1, 480).step(1).name('Velocity');
+        this.heroFolder.add(that.player.body, 'zIndex', 0, 3).step(1).name('z-index');
+
         //this.heroFolder.add(that.player, 'debugger').name('Debug body');
         this.heroFolder.add(that.player.body, 'collidable').name('Collidable');
         this.heroFolder.add(that.player.body, 'activeSteps').name('Steps').listen();

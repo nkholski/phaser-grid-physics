@@ -94,16 +94,15 @@ var _world = __webpack_require__(1);
 
 var _world2 = _interopRequireDefault(_world);
 
+var _tilemap = __webpack_require__(3);
+
+var _tilemap2 = _interopRequireDefault(_tilemap);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var GridPhysics = function () {
-    /*
-     TODO: 
-    1. Fix property names which is a mess after adding support for multiple maps, tilesets and layers.
-    2. Helper functions: Get mapIndex by passing a map (and maybe support it as argument to methods), Get layerIndex, get tile index from properties.
-    */
     function GridPhysics(scene) {
         _classCallCheck(this, GridPhysics);
 
@@ -111,31 +110,9 @@ var GridPhysics = function () {
         //  The Scene that owns this plugin
         this.scene = scene;
         this.world = new _world2.default();
-
+        this.tilemap = new _tilemap2.default();
         scene.gridPhysics = this;
-
         this.systems = scene.sys;
-
-        // TileMap the plugin belong to. 
-        // TODO: Array or object for multiple tilemaps support
-        // TODO: reference to layers too, and which is activated or not
-        this.map = null;
-
-        // Array with all tiles to animate
-        // TODO: Turn on and off certain tiles.
-        this.animatedTiles = [];
-
-        // Global playback rate
-        this.rate = 1;
-
-        // Should the animations play or not?
-        this.active = false;
-
-        // Should the animations play or not per layer. If global active is false this value makes no difference
-        this.activeLayer = [];
-
-        // Obey timescale?
-        this.followTimeScale = true;
 
         if (!scene.sys.settings.isBooted) {
             scene.sys.events.once('boot', this.boot, this);
@@ -151,216 +128,22 @@ var GridPhysics = function () {
         value: function boot() {
             var eventEmitter = this.systems.events;
             eventEmitter.on('update', this.update, this);
-
             eventEmitter.on('postupdate', this.postUpdate, this);
             eventEmitter.on('shutdown', this.shutdown, this);
             eventEmitter.on('destroy', this.destroy, this);
-        }
-
-        // Initilize support for animated tiles on given map
-
-    }, {
-        key: 'init',
-        value: function init(map) {
-            // TODO: Check if map is initilized already, if so do it again but overwrite the old.
-            var mapAnimData = this.getAnimatedTiles(map);
-            var animatedTiles = {
-                map: map,
-                animatedTiles: mapAnimData,
-                active: true,
-                rate: 1,
-                activeLayer: []
-            };
-            var i = 0;
-            map.layers.forEach(function () {
-                return animatedTiles.activeLayer.push(true);
-            });
-            this.animatedTiles.push(animatedTiles);
-            if (this.animatedTiles.length === 1) {
-                this.active = true; // Start the animations by default
-            }
-            /* Needed?
-            this.animatedTiles[this.animatedTiles.length-1].animatedTiles.forEach(
-                (animatedTile) => {
-                    animatedTile.tiles.forEach((layer) => {
-                        this.updateLayer(animatedTile,  layer);
-                    });
-                }
-            )*/
-        }
-    }, {
-        key: 'setRate',
-        value: function setRate(rate) {
-            var gid = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-            var map = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-
-            if (gid === null) {
-                if (map === null) {
-                    this.rate = rate;
-                } else {
-                    this.animatedTiles[map].rate = rate;
-                }
-            } else {
-                var loopThrough = function loopThrough(animatedTiles) {
-                    animatedTiles.forEach(function (animatedTile) {
-                        if (animatedTile.index === gid) {
-                            animatedTile.rate = rate;
-                        }
-                    });
-                };
-                if (map === null) {
-                    this.animatedTiles.forEach(function (animatedTiles) {
-                        loopThrough(animatedTiles.animatedTiles);
-                    });
-                } else {
-                    loopThrough(this.animatedTiles[map].animatedTiles);
-                }
-            }
-            // if tile is number (gid) --> set rate for that tile
-            // TODO: if passing an object -> check properties matching object and set rate
-        }
-    }, {
-        key: 'resetRates',
-        value: function resetRates() {
-            var mapIndex = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-
-            if (mapIndex === null) {
-                this.rate = 1;
-                this.animatedTiles.forEach(function (mapAnimData) {
-                    mapAnimData.rate = 1;
-                    mapAnimData.animatedTiles.forEach(function (tileAnimData) {
-                        tileAnimData.rate = 1;
-                    });
-                });
-            } else {
-                this.animatedTiles[mapIndex].rate = 1;
-                this.animatedTiles[mapIndex].animatedTiles.forEach(function (tileAnimData) {
-                    tileAnimData.rate = 1;
-                });
-            }
-        }
-
-        //  Start (or resume) animations
-
-    }, {
-        key: 'resume',
-        value: function resume() {
-            var _this = this;
-
-            var layerIndex = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-            var mapIndex = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-
-            var scope = mapIndex === null ? this : this.animatedTiles[mapIndex];
-            if (layerIndex === null) {
-                scope.active = true;
-            } else {
-                scope.activeLayer[layerIndex] = true;
-                scope.animatedTiles.forEach(function (animatedTile) {
-                    _this.updateLayer(animatedTile, animatedTile.tiles[layerIndex]);
-                });
-            }
-        }
-
-        // Stop (or pause) animations
-
-    }, {
-        key: 'pause',
-        value: function pause() {
-            var layerIndex = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-            var mapIndex = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-
-            var scope = mapIndex === null ? this : this.animatedTiles[mapIndex];
-            if (layerIndex === null) {
-                scope.active = false;
-            } else {
-                scope.activeLayer[layerIndex] = false;
-            }
         }
     }, {
         key: 'postUpdate',
         value: function postUpdate(time, delta) {
             this.world.bodies.forEach(function (body) {
-
                 body.postUpdate();
             });
         }
     }, {
         key: 'update',
         value: function update(time, delta) {
-            var _this2 = this;
-
             this.world.update(time, delta);
-            if (!this.active) {
-                return;
-            }
-            // Elapsed time is the delta multiplied by the global rate and the scene timeScale if folowTimeScale is true
-            var globalElapsedTime = delta * this.rate * (this.followTimeScale ? this.scene.time.timeScale : 1);
-            this.animatedTiles.forEach(function (mapAnimData) {
-                if (!mapAnimData.active) {
-                    return;
-                }
-                // Multiply with rate for this map
-                var elapsedTime = globalElapsedTime * mapAnimData.rate;
-                mapAnimData.animatedTiles.forEach(function (animatedTile) {
-                    // Reduce time for current tile, multiply elapsedTime with this tile's private rate
-                    animatedTile.next -= elapsedTime * animatedTile.rate;
-                    // Time for current tile is up!!!
-                    if (animatedTile.next < 0) {
-                        // Remember current frame index
-                        var currentIndex = animatedTile.currentFrame;
-                        // Remember the tileId of current tile
-                        var oldTileId = animatedTile.frames[currentIndex].tileid;
-                        // Advance to next in line
-                        var newIndex = currentIndex + 1;
-                        // If we went beyond last frame, we just start over
-                        if (newIndex > animatedTile.frames.length - 1) {
-                            newIndex = 0;
-                        }
-                        // Set lifelength for current frame
-                        animatedTile.next = animatedTile.frames[newIndex].duration;
-                        // Set index of current frame
-                        animatedTile.currentFrame = newIndex;
-                        // Store the tileId (gid) we will shift to
-                        // Loop through all tiles (via layers)
-                        //this.updateLayer
-                        animatedTile.tiles.forEach(function (layer, layerIndex) {
-                            if (!mapAnimData.activeLayer[layerIndex]) {
-                                return;
-                            }
-                            _this2.updateLayer(animatedTile, layer, oldTileId);
-                        });
-                    }
-                }); // animData loop
-            }); // Map loop
         }
-    }, {
-        key: 'updateLayer',
-        value: function updateLayer(animatedTile, layer) {
-            var oldTileId = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : -1;
-
-            var tilesToRemove = [];
-            var tileId = animatedTile.frames[animatedTile.currentFrame].tileid;
-            layer.forEach(function (tile) {
-                // If the tile is removed or has another index than expected, it's
-                // no longer animated. Mark for removal.
-                if (oldTileId > -1 && (tile === null || tile.index !== oldTileId)) {
-                    tilesToRemove.push(tile);
-                } else {
-                    // Finally we set the index of the tile to the one specified by current frame!!!
-                    tile.index = tileId;
-                }
-            });
-            // Remove obselete tiles
-            tilesToRemove.forEach(function (tile) {
-                var pos = layer.indexOf(tile);
-                if (pos > -1) {
-                    layer.splice(pos, 1);
-                } else {
-                    console.error("This shouldn't happen. Not at all. Blame Phaser Animated Tiles plugin. You'll be fine though.");
-                }
-            });
-        }
-
         //  Called when a Scene shuts down, it may then come back again later (which will invoke the 'start' event) but should be considered dormant.
 
     }, {
@@ -374,133 +157,6 @@ var GridPhysics = function () {
         value: function destroy() {
             this.shutdown();
             this.scene = undefined;
-        }
-    }, {
-        key: 'getAnimatedTiles',
-        value: function getAnimatedTiles(map) {
-            var _this3 = this;
-
-            // this.animatedTiles is an array of objects with information on how to animate and which tiles.
-            var animatedTiles = [];
-            // loop through all tilesets
-            map.tilesets.forEach(
-            // Go through the data stored on each tile (not tile on the tilemap but tile in the tileset)
-            function (tileset) {
-                var tileData = tileset.tileData;
-                Object.keys(tileData).forEach(function (index) {
-                    index = parseInt(index);
-                    // If tile has animation info we'll dive into it
-                    if (tileData[index].hasOwnProperty("animation")) {
-                        var animatedTileData = {
-                            index: index + tileset.firstgid, // gid of the original tile
-                            frames: [], // array of frames
-                            currentFrame: 0, // start on first frame
-                            tiles: [], // array with one array per layer with list of tiles that depends on this animation data
-                            rate: 1 // multiplier, set to 2 for double speed or 0.25 quarter speed
-                        };
-                        // push all frames to the animatedTileData
-                        tileData[index].animation.forEach(function (frameData) {
-                            var frame = {
-                                duration: frameData.duration,
-                                tileid: frameData.tileid + tileset.firstgid
-                            };
-                            animatedTileData.frames.push(frame);
-                        });
-                        // time until jumping to next frame
-                        animatedTileData.next = animatedTileData.frames[0].duration;
-                        // Go through all layers for tiles
-                        map.layers.forEach(function (layer) {
-                            if (layer.tilemapLayer.type === "StaticTilemapLayer") {
-                                // We just push an empty array if the layer is static (impossible to animate). 
-                                // If we just skip the layer, the layer order will be messed up
-                                // when updating animated tiles and things will look awful.
-                                animatedTileData.tiles.push([]);
-                                return;
-                            }
-                            // tiles array for current layer
-                            var tiles = [];
-                            // loop through all rows with tiles...
-                            layer.data.forEach(function (tileRow) {
-                                // ...and loop through all tiles in that row
-                                tileRow.forEach(function (tile) {
-                                    // Tiled start index for tiles with 1 but animation with 0. Thus that wierd "-1"                                                    
-                                    if (tile.index - tileset.firstgid === index) {
-                                        tiles.push(tile);
-                                    }
-                                });
-                            });
-                            // add the layer's array with tiles to the tiles array.
-                            // this will make it possible to control layers individually in the future
-                            animatedTileData.tiles.push(tiles);
-                        });
-                        // animatedTileData is finished for current animation, push it to the animatedTiles-property of the plugin
-                        animatedTiles.push(animatedTileData);
-                    }
-                });
-            });
-            map.layers.forEach(function (layer, layerIndex) {
-                // layer indices array of booleans whether to animate tiles on layer or not
-                _this3.activeLayer[layerIndex] = true;
-            });
-
-            return animatedTiles;
-        }
-    }, {
-        key: 'putTileAt',
-        value: function putTileAt(layer, tile, x, y) {
-            // Replaces putTileAt of the native API, but updates the list of animatedTiles in the process.
-            // No need to call updateAnimatedTiles as required for other modificatons of the tile-map
-        }
-    }, {
-        key: 'updateAnimatedTiles',
-        value: function updateAnimatedTiles() {
-            // future args: x=null, y=null, w=null, h=null, container=null 
-            var x = null,
-                y = null,
-                w = null,
-                h = null,
-                container = null;
-            // 1. If no container, loop through all initilized maps
-            if (container === null) {
-                container = [];
-                this.animatedTiles.forEach(function (mapAnimData) {
-                    container.push(mapAnimData);
-                });
-            }
-            // 2. If container is a map, loop through it's layers
-            // container = [container];
-
-            // 1 & 2: Update the map(s)
-            container.forEach(function (mapAnimData) {
-                var chkX = x !== null ? x : 0;
-                var chkY = y !== null ? y : 0;
-                var chkW = w !== null ? mapAnimData.map.width : 10;
-                var chkH = h !== null ? mapAnimData.map.height : 10;
-
-                mapAnimData.animatedTiles.forEach(function (tileAnimData) {
-                    tileAnimData.tiles.forEach(function (tiles, layerIndex) {
-                        var layer = mapAnimData.map.layers[layerIndex];
-                        if (layer.type === "StaticTilemapLayer") {
-                            return;
-                        }
-                        for (var _x9 = chkX; _x9 < chkX + chkW; _x9++) {
-                            for (var _y = chkY; _y < chkY + chkH; _y++) {
-                                var tile = mapAnimData.map.layers[layerIndex].data[_x9][_y];
-                                // should this tile be animated?
-                                if (tile.index == tileAnimData.index) {
-                                    // is it already known? if not, add it to the list
-                                    if (tiles.indexOf(tile) === -1) {
-                                        tiles.push(tile);
-                                    }
-                                    // update index to match current fram of this animation
-                                    tile.index = tileAnimData.frames[tileAnimData.currentFrame].tileid;
-                                }
-                            }
-                        }
-                    });
-                });
-            });
-            // 3. If container is a layer, just loop through it's tiles
         }
     }]);
 
@@ -527,6 +183,8 @@ module.exports = GridPhysics;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -614,13 +272,6 @@ var World = function () {
                     }
                     this.updateBorders(entity);
                     return;
-                    if (!this.map) {
-                        this.map = entity.tilemap;
-                    }
-                    this.addToLayerToCollision(entity);
-                    console.log("dasda", enity.tilemap);
-                    entity.updateBorders = this.updateBorders.bind(entity);
-                    break;
                 default:
                     // Phaser.TILEMAP????
                     if (entity.hasOwnProperty) {
@@ -661,10 +312,21 @@ var World = function () {
     }, {
         key: "addToQue",
         value: function addToQue(body) {
+            var _this = this;
+
             var reload = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
 
-            if (!body.hasOwnProperty("myTurn") && body.hasOwnProperty("body")) {
-                body = body.body;
+            if (!body.hasOwnProperty("myTurn")) {
+                if (body.hasOwnProperty("body")) {
+                    body = body.body;
+                } else if ((typeof body === "undefined" ? "undefined" : _typeof(body)) === "object" && body.length > 0) {
+                    body.forEach(function (b) {
+                        _this.addToQue(b, reload);
+                    });
+                    return;
+                } else {
+                    console.error("You need to pass a sprite with gridBody, gridBody or an array to addToQue.");
+                }
             }
 
             if (reload === 0) {
@@ -1062,11 +724,9 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-/*jshint esversion: 6 */
-
-var gridBody = function () {
-    function gridBody(sprite) {
-        _classCallCheck(this, gridBody);
+var GridBody = function () {
+    function GridBody(sprite) {
+        _classCallCheck(this, GridBody);
 
         /**
          * @property {Phaser.Sprite} sprite - Reference to the parent Sprite.
@@ -1077,6 +737,8 @@ var gridBody = function () {
          * @property {Phaser.Game} world - Local reference to the grid physics world.
          */
         this.world = Phaser.Physics.GridPhysics.world;
+
+        this.tilemap = Phaser.Physics.GridPhysics.tilemap;
 
         // UNDECIDED:
         /**
@@ -1097,6 +759,9 @@ var gridBody = function () {
          * @readonly
          */
         this.gridPosition = new Phaser.Geom.Point(0, 0);
+
+        this.zIndex = 0;
+        this.zHeight = 1;
 
         /**
          * @property {number} width - The calculated width of the physics body in grid units. Default match sprite size.
@@ -1289,10 +954,13 @@ var gridBody = function () {
         this.turns = 0;
         this.reload = 1;
 
+        this.sprite.originX = 0;
+        this.sprite.originY = 0;
+
         this.snapToGrid();
     }
 
-    _createClass(gridBody, [{
+    _createClass(GridBody, [{
         key: "snapToGrid",
         value: function snapToGrid() {
             this.gridPosition = {
@@ -1301,174 +969,6 @@ var gridBody = function () {
             };
             this.sprite.x = this.world.gridSize.x * this.gridPosition.x;
             this.sprite.y = this.world.gridSize.y * this.gridPosition.y;
-        }
-    }, {
-        key: "collideTilemap",
-        value: function collideTilemap(dx, dy) {
-            var slide = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-
-            var position = {
-                x: this.gridPosition.x + dx,
-                y: this.gridPosition.y + dy
-            };
-            var width = this.width;
-            var height = this.height;
-            if (dx !== 0) {
-                width = 1;
-                if (dx > 0) {
-                    position.x += this.width - 1;
-                }
-            } else {
-                if (dy !== 0) {
-                    height = 1;
-                    if (dy > 0) {
-                        position.y += this.height - 1;
-                    }
-                }
-            }
-            var tileRatio = {
-                x: 2,
-                y: 2
-            };
-            for (var x = position.x; x < position.x + width; x++) {
-                for (var y = position.y; y < position.y + height; y++) {
-                    var collide = false;
-                    var _iteratorNormalCompletion = true;
-                    var _didIteratorError = false;
-                    var _iteratorError = undefined;
-
-                    try {
-                        for (var _iterator = this.world.tilemaplayers[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                            var layer = _step.value;
-
-                            //let tile = this.world.map.getTileAt(Math.floor(x * this.world.gridSize.x / layer.collisionWidth), Math.floor(y * this.world.gridSize.y / layer.collisionHeight), layer, true);
-                            layer.collisionHeight = 16;
-                            layer.collisionWidth = 16;
-                            //let tile = this.world.getTileAt(Math.floor(x * this.world.gridSize.x / layer.collisionWidth), Math.floor(y * this.world.gridSize.y / layer.collisionHeight), layer, true);
-                            //debugger;
-                            var checkY = Math.floor(y * this.world.gridSize.y / layer.collisionHeight);
-                            var checkX = void 0;
-                            if (checkY < 0 || checkY > layer.layer.data.length - 1) {
-                                if (this.collideWorldBounds) {
-                                    return true;
-                                } else {
-                                    continue;
-                                }
-                            } else {
-                                checkX = Math.floor(x * this.world.gridSize.x / layer.collisionWidth);
-                                if (checkX < 0 || checkY > layer.layer.data[checkY].length - 1) {
-                                    if (this.collideWorldBounds) {
-                                        return true;
-                                    } else {
-                                        continue;
-                                    }
-                                }
-                            }
-
-                            var tile = layer.layer.data[checkY][checkX];
-
-                            if (tile === null || tile.index === -1) {
-                                // No tile, or empty - OK
-                                continue;
-                            }
-
-                            if (tile.collideRight && tile.collideLeft && tile.collideDown && tile.collideUp) {
-                                // tile collides whatever direction the body enter
-                                collide = true;
-                                break;
-                            } else if (dx < 0 && tile.collideRight) {
-                                // moving left and the tile collides from the right
-                                console.log("Collide RIGHT", tile);
-                                collide = true;
-                                break;
-                            } else if (dx > 0 && tile.collideLeft) {
-                                console.log("Collide KEFT", tile);
-                                collide = true;
-                                break;
-                            }
-                            if (dy < 0 && tile.collideDown) {
-                                console.log("Collide DOWN", tile);
-                                collide = true;
-                                break;
-                            } else if (dy > 0 && tile.collideUp) {
-                                console.log("Collide UP", tile);
-                                collide = true;
-                                break;
-                            }
-
-                            // Prevents bodies to walk with path of body outside of blocked tile side
-                            if (dx != 0) {
-                                if (tile.borderUp && position.y < tile.y * tileRatio.y) {
-                                    collide = true;
-                                    break;
-                                } else if (tile.borderDown && position.y + height > tile.y * tileRatio.y) {
-                                    collide = true;
-                                    break;
-                                }
-                            }
-                            if (dy != 0) {
-                                if (tile.borderLeft && position.x < tile.x * tileRatio.x) {
-                                    collide = true;
-                                    break;
-                                } else if (tile.borderRight && position.x + width > tile.x * tileRatio.x) {
-                                    collide = true;
-                                    break;
-                                }
-                            }
-                        }
-                    } catch (err) {
-                        _didIteratorError = true;
-                        _iteratorError = err;
-                    } finally {
-                        try {
-                            if (!_iteratorNormalCompletion && _iterator.return) {
-                                _iterator.return();
-                            }
-                        } finally {
-                            if (_didIteratorError) {
-                                throw _iteratorError;
-                            }
-                        }
-                    }
-
-                    if (collide) {
-                        if (slide) {
-                            // Left-over from previous working version, needs review...
-                            if (dx !== 0) {
-                                if (!this.collideTilemap(dx, dy - 1)) {
-                                    return {
-                                        dx: dx,
-                                        dy: dy - 1
-                                    };
-                                } else if (!this.collideTilemap(dx, dy + 1)) {
-                                    return {
-                                        dx: dx,
-                                        dy: dy + 1
-                                    };
-                                }
-                            }
-                            if (dy !== 0) {
-                                if (!this.collideTilemap(dx - 1, dy)) {
-                                    return {
-                                        dx: dx - 1,
-                                        dy: dy
-                                    };
-                                } else if (!this.collideTilemap(dx + 1, dy)) {
-                                    return {
-                                        dx: dx + 1,
-                                        dy: dy
-                                    };
-                                }
-                            }
-                        }
-                        return {
-                            dx: 0,
-                            dy: 0
-                        };
-                    }
-                }
-            }
-            return false;
         }
     }, {
         key: "setVelocity",
@@ -1499,17 +999,17 @@ var gridBody = function () {
             if (!this.collidable) {
                 return true;
             }
-            if (this.collideTilemap(dx, dy)) {
+            if (this.tilemap.collide(this.sprite, dx, dy)) {
                 return false;
             }
             // Kolla först tilemap för det kan bli krock direkt!
-            var _iteratorNormalCompletion2 = true;
-            var _didIteratorError2 = false;
-            var _iteratorError2 = undefined;
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
 
             try {
-                for (var _iterator2 = this.world.bodies[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                    var body = _step2.value;
+                for (var _iterator = this.world.bodies[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var body = _step.value;
 
 
                     if (this !== body && body.collidable) {
@@ -1541,16 +1041,16 @@ var gridBody = function () {
                     }
                 }
             } catch (err) {
-                _didIteratorError2 = true;
-                _iteratorError2 = err;
+                _didIteratorError = true;
+                _iteratorError = err;
             } finally {
                 try {
-                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                        _iterator2.return();
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
                     }
                 } finally {
-                    if (_didIteratorError2) {
-                        throw _iteratorError2;
+                    if (_didIteratorError) {
+                        throw _iteratorError;
                     }
                 }
             }
@@ -1636,27 +1136,27 @@ var gridBody = function () {
             // Check is strong enough
             if (this.strength > -1 || this.struggle > 1) {
                 var totalMass = 0;
-                var _iteratorNormalCompletion3 = true;
-                var _didIteratorError3 = false;
-                var _iteratorError3 = undefined;
+                var _iteratorNormalCompletion2 = true;
+                var _didIteratorError2 = false;
+                var _iteratorError2 = undefined;
 
                 try {
-                    for (var _iterator3 = this.world._pushChain[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                        var body = _step3.value;
+                    for (var _iterator2 = this.world._pushChain[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                        var body = _step2.value;
 
                         totalMass += body.mass;
                     }
                 } catch (err) {
-                    _didIteratorError3 = true;
-                    _iteratorError3 = err;
+                    _didIteratorError2 = true;
+                    _iteratorError2 = err;
                 } finally {
                     try {
-                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                            _iterator3.return();
+                        if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                            _iterator2.return();
                         }
                     } finally {
-                        if (_didIteratorError3) {
-                            throw _iteratorError3;
+                        if (_didIteratorError2) {
+                            throw _iteratorError2;
                         }
                     }
                 }
@@ -1704,13 +1204,13 @@ var gridBody = function () {
                     this.isLocked[_dim2] = true;
                     this._shadow[_dim2] = this.velocity[_dim2] < 0 ? 1 : -1;
 
-                    var _iteratorNormalCompletion4 = true;
-                    var _didIteratorError4 = false;
-                    var _iteratorError4 = undefined;
+                    var _iteratorNormalCompletion3 = true;
+                    var _didIteratorError3 = false;
+                    var _iteratorError3 = undefined;
 
                     try {
-                        for (var _iterator4 = this.world._pushChain[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-                            var _body = _step4.value;
+                        for (var _iterator3 = this.world._pushChain[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                            var _body = _step3.value;
 
                             _body.passiveSteps++;
                             _body.snapToGrid();
@@ -1719,16 +1219,16 @@ var gridBody = function () {
                             _body.isLocked[_dim2] = true;
                         }
                     } catch (err) {
-                        _didIteratorError4 = true;
-                        _iteratorError4 = err;
+                        _didIteratorError3 = true;
+                        _iteratorError3 = err;
                     } finally {
                         try {
-                            if (!_iteratorNormalCompletion4 && _iterator4.return) {
-                                _iterator4.return();
+                            if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                                _iterator3.return();
                             }
                         } finally {
-                            if (_didIteratorError4) {
-                                throw _iteratorError4;
+                            if (_didIteratorError3) {
+                                throw _iteratorError3;
                             }
                         }
                     }
@@ -1917,33 +1417,260 @@ var gridBody = function () {
                       /*this.moveTo.x =
                      this.moveTo.y = path[1].y*2;*/
         /*  if (x < this.gridPosition.x) {
-            //  this.setVelocity(-speed, 0);
-              this.moveTo.x = -1;
-          }
-          else if (x > this.gridPosition.x) {
-            //  this.setVelocity(speed, 0);
-              this.moveTo.x = 1;
-          }
-          else if (y < this.gridPosition.y) {
-            //  this.setVelocity(0, -speed);
-              this.moveTo.y = -1;
-          } else if (y > this.gridPosition.y) {
-            //  this.setVelocity(0, speed);
-              this.moveTo.y = 1;
-          }* /
-        }
-        });
-        easystar.setIterationsPerCalculation(1000);
-        easystar.calculate();
-        // This.isMovingToXY = {active: true, x,y,speed) <-- Kör på automatiskt medan detta finns. Testa ny väg vid varje stopp
+                        //  this.setVelocity(-speed, 0);
+                          this.moveTo.x = -1;
+                      }
+                      else if (x > this.gridPosition.x) {
+                        //  this.setVelocity(speed, 0);
+                          this.moveTo.x = 1;
+                      }
+                      else if (y < this.gridPosition.y) {
+                        //  this.setVelocity(0, -speed);
+                          this.moveTo.y = -1;
+                      } else if (y > this.gridPosition.y) {
+                        //  this.setVelocity(0, speed);
+                          this.moveTo.y = 1;
+                      }* /
+                }
+            });
+            easystar.setIterationsPerCalculation(1000);
+            easystar.calculate();
+             // This.isMovingToXY = {active: true, x,y,speed) <-- Kör på automatiskt medan detta finns. Testa ny väg vid varje stopp
         }*/
 
     }]);
 
-    return gridBody;
+    return GridBody;
 }();
 
-exports.default = gridBody;
+exports.default = GridBody;
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Tilemap = function () {
+    function Tilemap() {
+        _classCallCheck(this, Tilemap);
+
+        this.tilemaps = [];
+        this.world = Phaser.Physics.GridPhysics.world;
+    }
+
+    _createClass(Tilemap, [{
+        key: "collide",
+        value: function collide(source) {
+            var dx = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+            var dy = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+            var layers = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : this.world.tilemaplayers;
+            var slide = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
+
+            var position = void 0,
+                width = void 0,
+                height = void 0,
+                collideWorldBounds = void 0;
+
+            // Sort out variables to work with, either from a sprite with a body or just an object
+            if (source.hasOwnProperty("body")) {
+                position = {
+                    x: source.body.gridPosition.x,
+                    y: source.body.gridPosition.y
+                };
+                width = source.body.width;
+                height = source.body.height;
+                collideWorldBounds = source.body.collideWorldBounds;
+            } else {
+                position = {
+                    x: source.x,
+                    y: soruce.y
+                };
+                width = source.width;
+                height = source.height;
+                collideWorldBounds = source.hasOwnProperty("collideWorldBounds") ? source.collideWorldBounds : false;
+            }
+            // Prevent goint outside the tilemap?
+            if (collideWorldBounds && (position.x + dx < 0 || position.y + dy < 0 || position.x + dx + width > this.world.tilemaplayers[0].width / this.world.gridSize.x || position.y + dy + height > this.world.tilemaplayers[0].height / this.world.gridSize.y)) {
+                return true;
+            }
+
+            // Update the position to the attempted movement
+            position.x += dx;
+            position.y += dy;
+
+            // Slim the body to prevent unnecessary collision checks (not that the physics are particulary demanding but anyway)
+            if (dx !== 0) {
+                if (dx > 0) {
+                    position.x += width - 1;
+                }
+                width = 1;
+            } else if (dy !== 0) {
+                if (dy > 0) {
+                    position.y += height - 1;
+                }
+                height = 1;
+            }
+
+            var tileRatio = {
+                x: 2,
+                y: 2
+            };
+            for (var x = position.x; x < position.x + width; x++) {
+                for (var y = position.y; y < position.y + height; y++) {
+                    var collide = false;
+                    var _iteratorNormalCompletion = true;
+                    var _didIteratorError = false;
+                    var _iteratorError = undefined;
+
+                    try {
+                        for (var _iterator = this.world.tilemaplayers[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                            var layer = _step.value;
+
+                            //let tile = this.world.map.getTileAt(Math.floor(x * this.world.gridSize.x / layer.collisionWidth), Math.floor(y * this.world.gridSize.y / layer.collisionHeight), layer, true);
+                            layer.collisionHeight = 16;
+                            layer.collisionWidth = 16;
+                            //let tile = this.world.getTileAt(Math.floor(x * this.world.gridSize.x / layer.collisionWidth), Math.floor(y * this.world.gridSize.y / layer.collisionHeight), layer, true);
+                            //debugger;
+                            var checkY = Math.floor(y * this.world.gridSize.y / layer.collisionHeight);
+                            var checkX = void 0;
+                            if (checkY < 0 || checkY > layer.layer.data.length - 1) {
+                                if (this.collideWorldBounds) {
+                                    return true;
+                                } else {
+                                    continue;
+                                }
+                            } else {
+                                checkX = Math.floor(x * this.world.gridSize.x / layer.collisionWidth);
+                                if (checkX < 0 || checkY > layer.layer.data[checkY].length - 1) {
+                                    if (this.collideWorldBounds) {
+                                        return true;
+                                    } else {
+                                        continue;
+                                    }
+                                }
+                            }
+
+                            var tile = layer.layer.data[checkY][checkX];
+
+                            if (tile === null || tile.index === -1) {
+                                // No tile, or empty - OK
+                                continue;
+                            }
+
+                            if (tile.collideRight && tile.collideLeft && tile.collideDown && tile.collideUp) {
+                                // tile collides whatever direction the body enter
+                                collide = true;
+                                break;
+                            } else if (dx < 0 && tile.collideRight) {
+                                // moving left and the tile collides from the right
+                                //console.log("Collide RIGHT", tile)
+                                collide = true;
+                                break;
+                            } else if (dx > 0 && tile.collideLeft) {
+                                //console.log("Collide KEFT", tile)
+                                collide = true;
+                                break;
+                            }
+                            if (dy < 0 && tile.collideDown) {
+                                //console.log("Collide DOWN", tile)
+                                collide = true;
+                                break;
+                            } else if (dy > 0 && tile.collideUp) {
+                                //console.log("Collide UP", tile)
+                                collide = true;
+                                break;
+                            }
+
+                            // Prevents bodies to walk with path of body outside of blocked tile side
+                            if (dx != 0) {
+                                if (tile.borderUp && position.y < tile.y * tileRatio.y) {
+                                    collide = true;
+                                    break;
+                                } else if (tile.borderDown && position.y + height > tile.y * tileRatio.y) {
+                                    collide = true;
+                                    break;
+                                }
+                            }
+                            if (dy != 0) {
+                                if (tile.borderLeft && position.x < tile.x * tileRatio.x) {
+                                    collide = true;
+                                    break;
+                                } else if (tile.borderRight && position.x + width > tile.x * tileRatio.x) {
+                                    collide = true;
+                                    break;
+                                }
+                            }
+                        }
+                    } catch (err) {
+                        _didIteratorError = true;
+                        _iteratorError = err;
+                    } finally {
+                        try {
+                            if (!_iteratorNormalCompletion && _iterator.return) {
+                                _iterator.return();
+                            }
+                        } finally {
+                            if (_didIteratorError) {
+                                throw _iteratorError;
+                            }
+                        }
+                    }
+
+                    if (collide) {
+                        if (slide) {
+                            // Left-over from previous working version, needs review...
+                            if (dx !== 0) {
+                                if (!this.collide(source, dx, dy - 1)) {
+                                    return {
+                                        dx: dx,
+                                        dy: dy - 1
+                                    };
+                                } else if (!this.collide(source, dx, dy + 1)) {
+                                    return {
+                                        dx: dx,
+                                        dy: dy + 1
+                                    };
+                                }
+                            }
+                            if (dy !== 0) {
+                                if (!this.collide(source, dx - 1, dy)) {
+                                    return {
+                                        dx: dx - 1,
+                                        dy: dy
+                                    };
+                                } else if (!this.collide(source, dx + 1, dy)) {
+                                    return {
+                                        dx: dx + 1,
+                                        dy: dy
+                                    };
+                                }
+                            }
+                        }
+                        return {
+                            dx: 0,
+                            dy: 0
+                        };
+                    }
+                }
+            }
+            return false;
+        }
+    }]);
+
+    return Tilemap;
+}();
+
+exports.default = Tilemap;
 
 /***/ })
 /******/ ]);

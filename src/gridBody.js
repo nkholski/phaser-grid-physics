@@ -1,6 +1,3 @@
- /*jshint esversion: 6 */
-
-
  class GridBody {
      constructor(sprite) {
          /**
@@ -36,6 +33,9 @@
           * @readonly
           */
          this.gridPosition = new Phaser.Geom.Point(0, 0);
+
+         this.zIndex = 0;
+         this.zHeight = 1;
 
          /**
           * @property {number} width - The calculated width of the physics body in grid units. Default match sprite size.
@@ -232,7 +232,13 @@
          this.turns = 0;
          this.reload = 1;
 
+      
+         this.sprite.originX = 0;
+         this.sprite.originY = 0;
+         
          this.snapToGrid();
+
+         
      }
 
      snapToGrid() {

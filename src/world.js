@@ -116,9 +116,20 @@ export default class World {
 
 
     addToQue(body, reload = 0) {
-        if (!body.hasOwnProperty("myTurn") && body.hasOwnProperty("body")) {
-            body = body.body;
-        }
+        if (!body.hasOwnProperty("myTurn")) {
+            if( body.hasOwnProperty("body")){
+                body = body.body;
+            }
+            else if(typeof(body)==="object" && body.length >0){
+                body.forEach(b => {
+                    this.addToQue(b,reload);
+                });
+                return;
+            }
+            else {
+                console.error("You need to pass a sprite with gridBody, gridBody or an array to addToQue.");
+            }
+        }   
 
         if (reload === 0) {
             reload = body.reload > 0 ? body.reload : 1;
