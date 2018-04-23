@@ -21,7 +21,7 @@ var config = {
     }
 };
 
-var player, map, map2, tileset, layer1, layer2, layer3, map2layer, countdown, changed;
+var player, map, map2, tileset, layer, layer1, layer2, layer3, map2layer, countdown, changed;
 var game = new Phaser.Game(config);
 
 function preload() {
@@ -36,8 +36,6 @@ function preload() {
 var debugGraphics;
 
 function create() {
-    console.log(this);
-    console.log("INSTALLING     ")
     this.sys.install('GridPhysics');
 
 
@@ -46,7 +44,7 @@ function create() {
     });
     console.log(map.getLayerIndex);
     var tiles = map.addTilesetImage('basictiles', 'basictiles');
-    var layer = map.createStaticLayer("ground", tiles, 0, 0);
+     layer = map.createStaticLayer("ground", tiles, 0, 0);
     layer = map.createStaticLayer("onGround", tiles, 0, 0);
     layer.layer.data.forEach(row => row.forEach(tile => {
         if (!map.tilesets[0].tileProperties.hasOwnProperty(tile.index - 1)) {
@@ -261,26 +259,22 @@ function update(time, delta) {
     }
 
     this.enemies.forEach(enemy => {
-        if(enemy.body.isMoving.any){
+        if((enemy.body.activeSteps<enemy.steps) && enemy.body.isMoving.any){
             return;
         }
-        if(!enemy.steps){
-            enemy.steps = Phaser.Math.Between(3,8)
+            enemy.steps = enemy.body.activeSteps + Phaser.Math.Between(1,4)
             enemy.dir = Phaser.Math.Between(1,4)
-        }
         if (enemy.dir < 3) {
             enemy.body.setVelocity(enemy.dir === 1 ? vel : -vel, 0);
         } else {
             enemy.body.setVelocity(0, enemy.dir === 3 ? vel : -vel);
         }
-        enemy.steps--;
     });
 
     debug();
 }
 
 function debug() {
-    return;
     debugGraphics.clear();
     var color = 0xffff00;
     var thickness = 2;
@@ -289,5 +283,6 @@ function debug() {
     debugGraphics.lineStyle(thickness, color, alpha);
 
     debugGraphics.strokeRect(player.body.gridPosition.x * 8, player.body.gridPosition.y * 8, 16, 16);
-
+    //console.log(layer.getTileAt(player.body.gridPosition.x * 8,player.body.gridPosition.x * 8));
+debugger;
 }

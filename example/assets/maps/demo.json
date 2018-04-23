@@ -619,18 +619,18 @@
                 },
              "40":
                 {
-                 "borderDown":false,
+                 "borderDown":true,
                  "borderLeft":true,
                  "collide":false
                 },
              "41":
                 {
-                 "borderDown":false,
+                 "borderDown":true,
                  "collide":false
                 },
              "42":
                 {
-                 "borderDown":false,
+                 "borderDown":true,
                  "borderRight":true,
                  "collide":false
                 },
