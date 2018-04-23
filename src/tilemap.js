@@ -7,7 +7,7 @@ class Tilemap {
     }
 
     collide(source, dx = 0, dy = 0, layers = this.world.tilemaplayers, slide = false) {
-        let position, width, height, collideWorldBounds;
+        let position, width, height, collideWorldBounds, returnTile;
 
         // Sort out variables to work with, either from a sprite with a body or just an object
         if (source.hasOwnProperty("body")) {
@@ -21,11 +21,12 @@ class Tilemap {
         } else {
             position = {
                 x: source.x,
-                y: soruce.y
+                y: source.y
             };
-            width = source.width;
-            height = source.height;
+            width = source.width ? source.width : 1;
+            height = source.height ? source.height : 1;
             collideWorldBounds = source.hasOwnProperty("collideWorldBounds") ? source.collideWorldBounds : false;
+            returnTile = true;
         }
         // Prevent goint outside the tilemap?
         if (collideWorldBounds &&
@@ -61,6 +62,7 @@ class Tilemap {
             for (let y = position.y; y < position.y + height; y++) {
                 let collide = false;
                 for (let layer of this.world.tilemaplayers) {
+                    
                     //let tile = this.world.map.getTileAt(Math.floor(x * this.world.gridSize.x / layer.collisionWidth), Math.floor(y * this.world.gridSize.y / layer.collisionHeight), layer, true);
                     layer.collisionHeight = 16;
                     layer.collisionWidth = 16;
@@ -87,7 +89,11 @@ class Tilemap {
 
                     let tile = layer.layer.data[checkY][checkX];
 
-                    if (tile === null || tile.index === -1) { // No tile, or empty - OK
+                    if(returnTile){
+                        console.log(tile, checkX, checkY);
+                    }
+
+                    if (tile === null || (tile.index === -1 && !tile.gotBorder)) { // No tile, or empty - OK
                         continue;
                     }
 
@@ -114,7 +120,7 @@ class Tilemap {
                     }
 
                     // Prevents bodies to walk with path of body outside of blocked tile side
-                    if (dx != 0) {
+                   /* if (dx != 0) {
                         if (tile.borderUp && position.y < tile.y * tileRatio.y) {
                             collide = true;
                             break;
@@ -131,7 +137,7 @@ class Tilemap {
                             collide = true;
                             break;
                         }
-                    }
+                    }*/
 
                 }
                 if (collide) {

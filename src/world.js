@@ -97,18 +97,24 @@ export default class World {
                 if (tile.borderUp) {
                     tile.collideUp = true;
                     data[y - 1][x].collideDown = true;
+                    data[y - 1][x].gotBorder = true;
                 }
                 if (tile.borderDown) {
                     tile.collideDown = true;
                     data[y + 1][x].collideUp = true;
+                    data[y + 1][x].gotBorder = true;
+
                 }
                 if (tile.borderLeft) {
                     tile.collideLeft = true;
                     data[y][x - 1].collideRight = true;
+                    data[y][x - 1].gotBorder = true;
+
                 }
                 if (tile.borderRight) {
                     tile.collideRight = true;
                     data[y][x + 1].collideLeft = true;
+                    data[y][x + 1].gotBorder = true;
                 }
             }
         }
