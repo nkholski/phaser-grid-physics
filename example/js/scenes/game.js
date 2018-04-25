@@ -46,7 +46,7 @@ class Game extends Phaser.Scene {
 
         ["up", "right", "down", "left", "hit-up", "hit-right", "hit-down", "hit-left"].forEach(
             (key) => {
-                
+
                 this.anims.create({
                     key: 'hero/' + key,
                     frames: this.anims.generateFrameNames("sprites", {
@@ -72,7 +72,7 @@ class Game extends Phaser.Scene {
             repeatDelay: 0
         });
 
-       // map.createStaticLayer("above", tiles, 0, 0);
+        // map.createStaticLayer("above", tiles, 0, 0);
 
         this.player.play("hero/right");
 
@@ -82,7 +82,7 @@ class Game extends Phaser.Scene {
 
         this.player.body.strength = -1;
         this.player.body.collideWorldBounds = true;
-
+        this.player.id = "player";
         this.debugGraphics = this.add.graphics();
 
         this.enemies = [];
@@ -90,6 +90,7 @@ class Game extends Phaser.Scene {
         enemy.originX = 0;
         enemy.originY = 0;
         enemy.tint = 0xFF00FF;
+        enemy.id = "enemy1";
         enemy.play("hero/right");
 
         this.gridPhysics.world.enable(enemy);
@@ -98,6 +99,7 @@ class Game extends Phaser.Scene {
 
         this.enemies.push(enemy);
         enemy = this.add.sprite(48, 48 + 32);
+        enemy.id = "enemy2";
         enemy.originX = 0;
         enemy.originY = 0;
         enemy.tint = 0xFF00FF;
@@ -150,49 +152,81 @@ class Game extends Phaser.Scene {
         this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels)
         window.player = this.player;
 
-        this.gridPhysics.world.turnBased = true;
+        this.gridPhysics.world.turnbased = true;
         this.gridPhysics.world.addToQue(player);
         this.gridPhysics.world.addToQue(this.enemies);
+
+        console.log(this.player.body);
+        console.log(this.enemies);
+        console.log(this.gridPhysics.world.que)
+        //debugger;
+        this.gridPhysics.world.turnbased = false;
     }
 
     update(time, delta) {
+
         let vel = 50;
-        let animDir = "";
-        if (this.keys.up.isDown) {
-            this.player.body.setVelocity(0, -vel);
-            animDir = "up";
-        } else if (this.keys.right.isDown) {
-            this.player.body.setVelocity(vel, 0);
-            animDir = "right";
-        } else if (this.keys.down.isDown) {
-            this.player.body.setVelocity(0, vel);
-            animDir = "down";
-        } else if (this.keys.left.isDown) {
-            this.player.body.setVelocity(-vel, 0);
-            animDir = "left";
-        } else {
-            this.player.body.setVelocity(0, 0);
-        }
-        let anim = "hero/" + animDir;
-        if (anim !== this.player.anims.currentAnim.key) {
-            this.player.play(anim);
+        //console.log(this.gridPhysics.world.firstInLine.id);
+        if (this.gridPhysics.world.firstInLine.body.justMoved) {
+            this.gridPhysics.world.nextTurn();
+            console.log(this.gridPhysics.world.que)
         }
 
+        if (this.player.body.myTurn || !this.gridPhysics.world.turnbased) {
 
-
-        this.enemies.forEach(enemy => {
-            if ((enemy.body.activeSteps < enemy.steps) && enemy.body.isMoving.any) {
-                return;
-            }
-            enemy.steps = enemy.body.activeSteps + Phaser.Math.Between(1, 4)
-            enemy.dir = Phaser.Math.Between(1, 4)
-            if (enemy.dir < 3) {
-                enemy.body.setVelocity(enemy.dir === 1 ? vel : -vel, 0);
+            let animDir = "";
+            let madeAMove = false;
+            if (this.keys.up.isDown) {
+                this.player.body.setVelocity(0, -vel);
+                madeAMove = true;
+                animDir = "up";
+            } else if (this.keys.right.isDown) {
+                this.player.body.setVelocity(vel, 0);
+                madeAMove = true;
+                animDir = "right";
+            } else if (this.keys.down.isDown) {
+                this.player.body.setVelocity(0, vel);
+                madeAMove = true;
+                animDir = "down";
+            } else if (this.keys.left.isDown) {
+                this.player.body.setVelocity(-vel, 0);
+                madeAMove = true;
+                animDir = "left";
             } else {
-                enemy.body.setVelocity(0, enemy.dir === 3 ? vel : -vel);
+                this.player.body.setVelocity(0, 0);
             }
-        });
+            let anim = "hero/" + animDir;
+            if (anim !== this.player.anims.currentAnim.key) {
+                this.player.play(anim);
+            }
+            if (!this.gridPhysics.world.turnbased) {
+                this.enemies.forEach(enemy => {
+                    if ((enemy.body.activeSteps < enemy.steps) && enemy.body.isMoving.any) {
+                        return;
+                    }
+                    enemy.steps = enemy.body.activeSteps + Phaser.Math.Between(1, 4)
+                    enemy.dir = Phaser.Math.Between(1, 4)
+                    if (enemy.dir < 3) {
+                        enemy.body.setVelocity(enemy.dir === 1 ? vel : -vel, 0);
+                    } else {
+                        enemy.body.setVelocity(0, enemy.dir === 3 ? vel : -vel);
+                    }
+                });
+            }
+        } else {
 
+                let enemy = this.gridPhysics.world.firstInLine;
+                if ((enemy.body.activeSteps > enemy.steps) || !enemy.body.isMoving.any) {
+                    enemy.steps = enemy.body.activeSteps + Phaser.Math.Between(1, 4)
+                    enemy.dir = Phaser.Math.Between(1, 4);
+                }
+                if (enemy.dir < 3) {
+                    enemy.body.setVelocity(enemy.dir === 1 ? vel : -vel, 0);
+                } else {
+                    enemy.body.setVelocity(0, enemy.dir === 3 ? vel : -vel);
+                }
+            
+        }
         this.debug();
     }
     debug() {

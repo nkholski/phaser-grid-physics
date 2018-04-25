@@ -313,6 +313,7 @@
      }
 
      postUpdate() {
+         this.justMoved = false;
          if (this.isLocked.x || this.isLocked.y) {
              return;
          }
@@ -475,7 +476,7 @@
 
          this.baseVelocity = 75;
          this.activeSteps++;
-
+         this.justMoved = true;
 
 
      }

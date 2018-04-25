@@ -14,7 +14,7 @@ export default class World {
         // Locked while pushed
         this.lockBodies = false;
 
-        // Sprites and stuff with gridPhysics enabled
+        // Sprites and stuff with gridPhysics enable
         this.bodies = [];
 
         // Collidable tilemap layers
@@ -56,7 +56,7 @@ export default class World {
         this.turnbased = false;
         this.turn = 0;
         this.que = [];
-
+        this.firstInLine = null;
         this.collisionMap = null;
 
 
@@ -137,10 +137,14 @@ export default class World {
             }
         }   
 
+        
+        this.firstInLine = this.firstInLine ? this.firstInLine : body.sprite;
+        this.firstInLine.body.myTurn = true;
+
         if (reload === 0) {
             reload = body.reload > 0 ? body.reload : 1;
         }
-        // Gör kön tillräckligt lång
+        // Fill the que with nulls to make room for quicker or faster units.
         if (this.que.length < reload * 2) {
             for (let s = 0; s < reload * 2; s++) {
                 this.que.push(null);
@@ -151,26 +155,40 @@ export default class World {
             pos++;
         }
         this.que.splice(pos, 0, body);
+
+        // Remove unnecessary nulls in the beginning of the array from the first added body
+        while (this.que[0] === null && this.que.length > 0) {
+            this.que.shift(0);
+        }
+
+
     }
 
-    nextTurn(oldBody = null, reload = 0) {
-        if (oldBody != null) {
-            oldBody.myTurn = false;
-            oldBody.turns++;
-            this.turn++;
-            this.addToQue(oldBody, reload);
-        }
-
+    nextTurn(reload = 0) {
         let body = null;
-        while (body === null && this.que.length > 0) {
-            body = this.que.shift(0);
-        }
-        if (body === null) {
-            console.error("EMPTY QUE!");
-            return false;
-        }
-        body.myTurn = true;
 
+        // Add current body to the end of the que
+        this.addToQue(this.firstInLine, reload);
+        this.firstInLine.body.myTurn = false;
+        this.firstInLine.body.turn++;
+        
+        // Keep track of total global moves
+        this.turn++;
+        this.que.shift(0);
+
+        while (this.que[0] === null && this.que.length > 0) {
+            this.que.shift(0);
+        }
+
+
+        if (this.que.length === 0) {
+            console.error("EMPTY QUE!");
+            return;
+        }
+
+        body = this.que[0];
+        body.myTurn = true;
+        this.firstInLine = body.sprite;
     }
 
     update(time, delta) {

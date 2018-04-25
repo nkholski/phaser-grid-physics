@@ -6,7 +6,7 @@
          "name":"ground",
          "opacity":1,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":36,
          "x":0,
          "y":0

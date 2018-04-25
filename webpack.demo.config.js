@@ -19,7 +19,7 @@ module.exports = {
         GridPhysics: './src/main.js',
         demo: [
             'babel-polyfill',
-            path.resolve(__dirname, 'example/js/game.js')
+            path.resolve(__dirname, 'example/js/main.js')
         ],
         vendor: ['phaser', 'dat.gui']  
     },
