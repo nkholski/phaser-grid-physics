@@ -8,9 +8,10 @@ The plugin is being developed and there are both bugs and missing features. I'm 
 
 **Setup instructions** is in the end of this file.
 
-**Demo** running the Phaser 2 version of the plugin is hosted here: http://metroid.niklasberg.se/gridPhysics/ (all except pathfinding is identical to the Phaser 3 version)
+**Demo** Current version is hosted here: http://metroid.niklasberg.se/P3GridPhysics/
+(The Phaser 2 demo with pathfinding support not yet added to the Phaser 3 version:  http://metroid.niklasberg.se/gridPhysics/)
 
-**Discuss** by submitting issues here or on html5gamedevs.com: http://www.html5gamedevs.com/topic/28051-grid-physics-plugin/
+**Discuss** Questions, feedback, requests or and other stuff related to the plugin: http://www.html5gamedevs.com/topic/37156-grid-physics-plugin-for-phaser-3/
 
 ## Credits
 * Tileset and sprites: Dawnlike by DragonDePlatino, DawnBringer. http://opengameart.org/content/dawnlike-16x16-universal-rogue-like-tileset-v181

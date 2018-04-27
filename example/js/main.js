@@ -1,6 +1,4 @@
 import "phaser";
-import dat from 'dat.gui';
-import debugGUI from './debugGUI';
 import { ENOMEM } from "constants";
 // States
 import  Game  from './scenes/game';
@@ -20,7 +18,5 @@ let config = {
         }
     }
 };
-
-console.log(Game);
 
 let game = new Phaser.Game(config);

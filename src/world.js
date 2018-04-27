@@ -21,9 +21,10 @@ export default class World {
         this.tilemaplayers = [];
 
         this.tileGridRatio = new Phaser.Geom.Point(-1, -1);
-        console.log(this.tileGridRatio);
+
         this._pushChain = [];
 
+        this.stairs = [];
 
         this.map = null;
 
@@ -88,10 +89,8 @@ export default class World {
         }
     }
     updateBorders(layer) {
-        console.log("UPDATE BLOCKED", layer)
         let data = layer.layer.data;
         for (let y = 0; y < data.length; y++) {
-            console.log("y" + y);
             for (let x = 0; x < data[y].length; x++) {
                 let tile = data[y][x];
                 if (tile.borderUp) {
@@ -179,7 +178,6 @@ export default class World {
         while (this.que[0] === null && this.que.length > 0) {
             this.que.shift(0);
         }
-
 
         if (this.que.length === 0) {
             console.error("EMPTY QUE!");
@@ -454,5 +452,14 @@ export default class World {
 
         //return collisionLayer ? collisionLayer : null;
         console.log(map.layers[colLayerIndex]);
+    }
+
+    addStairs(obj){
+        this.stairs.push({
+            x: obj.x/16,
+            y: obj.y/16,
+            width:obj.width/16,
+            height: obj.height/16
+        })
     }
 }

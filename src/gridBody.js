@@ -479,6 +479,22 @@
          this.justMoved = true;
 
 
+         this.onStairs = this.checkStairs(this);
+
+
+     }
+
+
+     checkStairs(body){
+        for(let stairs of this.world.stairs){
+            if(body.gridPosition.x>=stairs.x && body.gridPosition.x<=stairs.x+stairs.width && 
+                body.gridPosition.y>=stairs.y && body.gridPosition.y<=stairs.y+stairs.height){
+                }            
+            }
+        
+        return false;
+
+
      }
 
      /*renderDebugBody() {

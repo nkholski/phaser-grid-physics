@@ -408,6 +408,14 @@
                  "height":16,
                  "id":45,
                  "name":"",
+                 "properties":
+                    {
+                     "level":"above"
+                    },
+                 "propertytypes":
+                    {
+                     "level":"string"
+                    },
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -825,7 +833,9 @@
              "96":
                 {
                  "cancelCollision":true,
-                 "forceX":25
+                 "forceX":25,
+                 "level":"above",
+                 "upRight":false
                 },
              "97":
                 {
@@ -1208,7 +1218,9 @@
              "96":
                 {
                  "cancelCollision":"bool",
-                 "forceX":"float"
+                 "forceX":"float",
+                 "level":"string",
+                 "upRight":"bool"
                 },
              "97":
                 {

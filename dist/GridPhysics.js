@@ -211,15 +211,17 @@ var World = function () {
         // Locked while pushed
         this.lockBodies = false;
 
-        // Sprites and stuff with gridPhysics enabled
+        // Sprites and stuff with gridPhysics enable
         this.bodies = [];
 
         // Collidable tilemap layers
         this.tilemaplayers = [];
 
         this.tileGridRatio = new Phaser.Geom.Point(-1, -1);
-        console.log(this.tileGridRatio);
+
         this._pushChain = [];
+
+        this.stairs = [];
 
         this.map = null;
 
@@ -252,7 +254,7 @@ var World = function () {
         this.turnbased = false;
         this.turn = 0;
         this.que = [];
-
+        this.firstInLine = null;
         this.collisionMap = null;
     }
 
@@ -284,27 +286,29 @@ var World = function () {
     }, {
         key: "updateBorders",
         value: function updateBorders(layer) {
-            console.log("UPDATE BLOCKED", layer);
             var data = layer.layer.data;
             for (var y = 0; y < data.length; y++) {
-                console.log("y" + y);
                 for (var x = 0; x < data[y].length; x++) {
                     var tile = data[y][x];
                     if (tile.borderUp) {
                         tile.collideUp = true;
                         data[y - 1][x].collideDown = true;
+                        data[y - 1][x].gotBorder = true;
                     }
                     if (tile.borderDown) {
                         tile.collideDown = true;
                         data[y + 1][x].collideUp = true;
+                        data[y + 1][x].gotBorder = true;
                     }
                     if (tile.borderLeft) {
                         tile.collideLeft = true;
                         data[y][x - 1].collideRight = true;
+                        data[y][x - 1].gotBorder = true;
                     }
                     if (tile.borderRight) {
                         tile.collideRight = true;
                         data[y][x + 1].collideLeft = true;
+                        data[y][x + 1].gotBorder = true;
                     }
                 }
             }
@@ -329,10 +333,13 @@ var World = function () {
                 }
             }
 
+            this.firstInLine = this.firstInLine ? this.firstInLine : body.sprite;
+            this.firstInLine.body.myTurn = true;
+
             if (reload === 0) {
                 reload = body.reload > 0 ? body.reload : 1;
             }
-            // Gör kön tillräckligt lång
+            // Fill the que with nulls to make room for quicker or faster units.
             if (this.que.length < reload * 2) {
                 for (var s = 0; s < reload * 2; s++) {
                     this.que.push(null);
@@ -343,29 +350,40 @@ var World = function () {
                 pos++;
             }
             this.que.splice(pos, 0, body);
+
+            // Remove unnecessary nulls in the beginning of the array from the first added body
+            while (this.que[0] === null && this.que.length > 0) {
+                this.que.shift(0);
+            }
         }
     }, {
         key: "nextTurn",
         value: function nextTurn() {
-            var oldBody = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-            var reload = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-
-            if (oldBody != null) {
-                oldBody.myTurn = false;
-                oldBody.turns++;
-                this.turn++;
-                this.addToQue(oldBody, reload);
-            }
+            var reload = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 
             var body = null;
-            while (body === null && this.que.length > 0) {
-                body = this.que.shift(0);
+
+            // Add current body to the end of the que
+            this.addToQue(this.firstInLine, reload);
+            this.firstInLine.body.myTurn = false;
+            this.firstInLine.body.turn++;
+
+            // Keep track of total global moves
+            this.turn++;
+            this.que.shift(0);
+
+            while (this.que[0] === null && this.que.length > 0) {
+                this.que.shift(0);
             }
-            if (body === null) {
+
+            if (this.que.length === 0) {
                 console.error("EMPTY QUE!");
-                return false;
+                return;
             }
+
+            body = this.que[0];
             body.myTurn = true;
+            this.firstInLine = body.sprite;
         }
     }, {
         key: "update",
@@ -701,6 +719,16 @@ var World = function () {
 
             //return collisionLayer ? collisionLayer : null;
             console.log(map.layers[colLayerIndex]);
+        }
+    }, {
+        key: "addStairs",
+        value: function addStairs(obj) {
+            this.stairs.push({
+                x: obj.x / 16,
+                y: obj.y / 16,
+                width: obj.width / 16,
+                height: obj.height / 16
+            });
         }
     }]);
 
@@ -1060,6 +1088,7 @@ var GridBody = function () {
     }, {
         key: "postUpdate",
         value: function postUpdate() {
+            this.justMoved = false;
             if (this.isLocked.x || this.isLocked.y) {
                 return;
             }
@@ -1256,6 +1285,39 @@ var GridBody = function () {
 
             this.baseVelocity = 75;
             this.activeSteps++;
+            this.justMoved = true;
+
+            this.onStairs = this.checkStairs(this);
+        }
+    }, {
+        key: "checkStairs",
+        value: function checkStairs(body) {
+            var _iteratorNormalCompletion4 = true;
+            var _didIteratorError4 = false;
+            var _iteratorError4 = undefined;
+
+            try {
+                for (var _iterator4 = this.world.stairs[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                    var stairs = _step4.value;
+
+                    if (body.gridPosition.x >= stairs.x && body.gridPosition.x <= stairs.x + stairs.width && body.gridPosition.y >= stairs.y && body.gridPosition.y <= stairs.y + stairs.height) {}
+                }
+            } catch (err) {
+                _didIteratorError4 = true;
+                _iteratorError4 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                        _iterator4.return();
+                    }
+                } finally {
+                    if (_didIteratorError4) {
+                        throw _iteratorError4;
+                    }
+                }
+            }
+
+            return false;
         }
 
         /*renderDebugBody() {
@@ -1479,7 +1541,8 @@ var Tilemap = function () {
             var position = void 0,
                 width = void 0,
                 height = void 0,
-                collideWorldBounds = void 0;
+                collideWorldBounds = void 0,
+                returnTile = void 0;
 
             // Sort out variables to work with, either from a sprite with a body or just an object
             if (source.hasOwnProperty("body")) {
@@ -1493,11 +1556,12 @@ var Tilemap = function () {
             } else {
                 position = {
                     x: source.x,
-                    y: soruce.y
+                    y: source.y
                 };
-                width = source.width;
-                height = source.height;
+                width = source.width ? source.width : 1;
+                height = source.height ? source.height : 1;
                 collideWorldBounds = source.hasOwnProperty("collideWorldBounds") ? source.collideWorldBounds : false;
+                returnTile = true;
             }
             // Prevent goint outside the tilemap?
             if (collideWorldBounds && (position.x + dx < 0 || position.y + dy < 0 || position.x + dx + width > this.world.tilemaplayers[0].width / this.world.gridSize.x || position.y + dy + height > this.world.tilemaplayers[0].height / this.world.gridSize.y)) {
@@ -1536,6 +1600,7 @@ var Tilemap = function () {
                         for (var _iterator = this.world.tilemaplayers[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                             var layer = _step.value;
 
+
                             //let tile = this.world.map.getTileAt(Math.floor(x * this.world.gridSize.x / layer.collisionWidth), Math.floor(y * this.world.gridSize.y / layer.collisionHeight), layer, true);
                             layer.collisionHeight = 16;
                             layer.collisionWidth = 16;
@@ -1562,7 +1627,11 @@ var Tilemap = function () {
 
                             var tile = layer.layer.data[checkY][checkX];
 
-                            if (tile === null || tile.index === -1) {
+                            if (returnTile) {
+                                console.log(tile, checkX, checkY);
+                            }
+
+                            if (tile === null || tile.index === -1 && !tile.gotBorder) {
                                 // No tile, or empty - OK
                                 continue;
                             }
@@ -1592,24 +1661,24 @@ var Tilemap = function () {
                             }
 
                             // Prevents bodies to walk with path of body outside of blocked tile side
-                            if (dx != 0) {
-                                if (tile.borderUp && position.y < tile.y * tileRatio.y) {
-                                    collide = true;
-                                    break;
-                                } else if (tile.borderDown && position.y + height > tile.y * tileRatio.y) {
-                                    collide = true;
-                                    break;
-                                }
-                            }
-                            if (dy != 0) {
-                                if (tile.borderLeft && position.x < tile.x * tileRatio.x) {
-                                    collide = true;
-                                    break;
-                                } else if (tile.borderRight && position.x + width > tile.x * tileRatio.x) {
-                                    collide = true;
-                                    break;
-                                }
-                            }
+                            /* if (dx != 0) {
+                                 if (tile.borderUp && position.y < tile.y * tileRatio.y) {
+                                     collide = true;
+                                     break;
+                                 } else if (tile.borderDown && position.y + height > tile.y * tileRatio.y) {
+                                     collide = true;
+                                     break;
+                                 }
+                             }
+                             if (dy != 0) {
+                                 if (tile.borderLeft && position.x < tile.x * tileRatio.x) {
+                                     collide = true;
+                                     break;
+                                 } else if (tile.borderRight && position.x + width > tile.x * tileRatio.x) {
+                                     collide = true;
+                                     break;
+                                 }
+                             }*/
                         }
                     } catch (err) {
                         _didIteratorError = true;

@@ -1,5 +1,6 @@
 import "phaser";
-
+import dat from 'dat.gui';
+import debugGUI from '../debugGUI';
 class Game extends Phaser.Scene {
     constructor() {
         super({
@@ -43,6 +44,8 @@ class Game extends Phaser.Scene {
         this.gridPhysics.world.enable(layer);
 
         this.player = this.add.sprite(0, 0);
+        this.velocity = 50;
+
 
         ["up", "right", "down", "left", "hit-up", "hit-right", "hit-down", "hit-left"].forEach(
             (key) => {
@@ -72,11 +75,17 @@ class Game extends Phaser.Scene {
             repeatDelay: 0
         });
 
-        // map.createStaticLayer("above", tiles, 0, 0);
+        //let layer2 = map.createStaticLayer("above", tiles, 0, 0);
+        //layer2.setDepth(2);
 
+    
         this.player.play("hero/right");
 
         this.gridPhysics.world.enable(this.player);
+        /*this.player.body.gridPosition.x = 48;
+        this.player.body.gridPosition.y = 14;*/
+        this.player.body.gridPosition.x = 25;
+        this.player.body.gridPosition.y = 16;
         this.player.body.immovable = true;
         this.player.body.baseVelocity = 50;
 
@@ -84,6 +93,7 @@ class Game extends Phaser.Scene {
         this.player.body.collideWorldBounds = true;
         this.player.id = "player";
         this.debugGraphics = this.add.graphics();
+        this.player.setDepth(1);
 
         this.enemies = [];
         let enemy = this.add.sprite(0, 48);
@@ -109,27 +119,33 @@ class Game extends Phaser.Scene {
         enemy.body.immovable = true;
         this.enemies.push(enemy);
         for (let crateObj of map.objects[0].objects) {
-            let anim = "box"
-            if (crateObj.properties && crateObj.properties.box) {
-                anim += crateObj.properties.box;
-            }
 
-            let crate = this.add.sprite(crateObj.x, crateObj.y - 16);
-            crate.originX = 0;
-            crate.originY = 0;
-            crate.play("crate");
-            if (crateObj.properties && crateObj.properties.scale) {
-                crate.width = 16 * crateObj.properties.scale;
-                crate.height = 16 * crateObj.properties.scale;
-                crate.setScale(crateObj.properties.scale)
+            if (crateObj.properties && crateObj.properties.level) {
+                //layer.layer.data[crateObj.y/16][crateObj.x/16].level = true;
+                this.gridPhysics.world.addStairs(crateObj);
             } else {
-                crate.width = 16;
-                crate.height = 16;
-            }
-            this.gridPhysics.world.enable(crate);
-            crate.body.collideWorldBounds = true;
-            if (crateObj.properties && crateObj.properties.mass) {
-                crate.body.mass = crateObj.properties.mass;
+
+                let anim = "box"
+                if (crateObj.properties && crateObj.properties.box) {
+                    anim += crateObj.properties.box;
+                }
+                let crate = this.add.sprite(crateObj.x, crateObj.y - 16);
+                crate.originX = 0;
+                crate.originY = 0;
+                crate.play("crate");
+                if (crateObj.properties && crateObj.properties.scale) {
+                    crate.width = 16 * crateObj.properties.scale;
+                    crate.height = 16 * crateObj.properties.scale;
+                    crate.setScale(crateObj.properties.scale)
+                } else {
+                    crate.width = 16;
+                    crate.height = 16;
+                }
+                this.gridPhysics.world.enable(crate);
+                crate.body.collideWorldBounds = true;
+                if (crateObj.properties && crateObj.properties.mass) {
+                    crate.body.mass = crateObj.properties.mass;
+                }
             }
         }
 
@@ -142,34 +158,28 @@ class Game extends Phaser.Scene {
         };
 
 
-        /*  if (!this.debugGUI) {
+          if (!this.debugGUI) {
             this.debugGUI = new debugGUI();
         }
         this.debugGUI.setupGUI(this)
-    */
+    
 
         this.cameras.main.startFollow(this.player);
         this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels)
         window.player = this.player;
 
-        this.gridPhysics.world.turnbased = true;
         this.gridPhysics.world.addToQue(player);
         this.gridPhysics.world.addToQue(this.enemies);
 
-        console.log(this.player.body);
-        console.log(this.enemies);
-        console.log(this.gridPhysics.world.que)
         //debugger;
-        this.gridPhysics.world.turnbased = false;
+   //     this.gridPhysics.world.turnbased = true;
     }
 
     update(time, delta) {
 
-        let vel = 50;
         //console.log(this.gridPhysics.world.firstInLine.id);
         if (this.gridPhysics.world.firstInLine.body.justMoved) {
             this.gridPhysics.world.nextTurn();
-            console.log(this.gridPhysics.world.que)
         }
 
         if (this.player.body.myTurn || !this.gridPhysics.world.turnbased) {
@@ -177,19 +187,19 @@ class Game extends Phaser.Scene {
             let animDir = "";
             let madeAMove = false;
             if (this.keys.up.isDown) {
-                this.player.body.setVelocity(0, -vel);
+                this.player.body.setVelocity(0, -this.velocity);
                 madeAMove = true;
                 animDir = "up";
             } else if (this.keys.right.isDown) {
-                this.player.body.setVelocity(vel, 0);
+                this.player.body.setVelocity(this.velocity, 0);
                 madeAMove = true;
                 animDir = "right";
             } else if (this.keys.down.isDown) {
-                this.player.body.setVelocity(0, vel);
+                this.player.body.setVelocity(0, this.velocity);
                 madeAMove = true;
                 animDir = "down";
             } else if (this.keys.left.isDown) {
-                this.player.body.setVelocity(-vel, 0);
+                this.player.body.setVelocity(-this.velocity, 0);
                 madeAMove = true;
                 animDir = "left";
             } else {
@@ -207,27 +217,27 @@ class Game extends Phaser.Scene {
                     enemy.steps = enemy.body.activeSteps + Phaser.Math.Between(1, 4)
                     enemy.dir = Phaser.Math.Between(1, 4)
                     if (enemy.dir < 3) {
-                        enemy.body.setVelocity(enemy.dir === 1 ? vel : -vel, 0);
+                        enemy.body.setVelocity(enemy.dir === 1 ? this.velocity : -this.velocity, 0);
                     } else {
-                        enemy.body.setVelocity(0, enemy.dir === 3 ? vel : -vel);
+                        enemy.body.setVelocity(0, enemy.dir === 3 ? this.velocity : -this.velocity);
                     }
                 });
             }
         } else {
 
-                let enemy = this.gridPhysics.world.firstInLine;
-                if ((enemy.body.activeSteps > enemy.steps) || !enemy.body.isMoving.any) {
-                    enemy.steps = enemy.body.activeSteps + Phaser.Math.Between(1, 4)
-                    enemy.dir = Phaser.Math.Between(1, 4);
-                }
-                if (enemy.dir < 3) {
-                    enemy.body.setVelocity(enemy.dir === 1 ? vel : -vel, 0);
-                } else {
-                    enemy.body.setVelocity(0, enemy.dir === 3 ? vel : -vel);
-                }
-            
+            let enemy = this.gridPhysics.world.firstInLine;
+            if ((enemy.body.activeSteps > enemy.steps) || !enemy.body.isMoving.any) {
+                enemy.steps = enemy.body.activeSteps + Phaser.Math.Between(1, 4)
+                enemy.dir = Phaser.Math.Between(1, 4);
+            }
+            if (enemy.dir < 3) {
+                enemy.body.setVelocity(enemy.dir === 1 ? this.velocity : -this.velocity, 0);
+            } else {
+                enemy.body.setVelocity(0, enemy.dir === 3 ? this.velocity : -this.velocity);
+            }
+
         }
-        this.debug();
+        //this.debug();
     }
     debug() {
         this.debugGraphics.clear();
