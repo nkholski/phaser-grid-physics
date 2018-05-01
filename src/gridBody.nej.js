@@ -236,14 +236,14 @@
          this.reload = 1;
 
 
-         this.onStairs = false;
+this.onStairs = false;
 
          this.sprite.originX = 0;
          this.sprite.originY = 0;
 
          this.snapToGrid();
 
-
+         
 
 
      }
@@ -286,12 +286,12 @@
              return true;
          }
 
-
+         
          if (this.onStairs) {
              console.log("ONSTAIRS")
-             this.level = this.tilemap.checkLevel(this.sprite, dx, dy);
+           this.level = this.tilemap.checkLevel(this.sprite, dx, dy);
          }
-
+  
 
          if (this.tilemap.collide(this.sprite, dx, dy)) {
              return false;
@@ -504,14 +504,16 @@
 
          this.onStairs = this.checkStairs(this);
 
-         if (wasOnStairs && !this.onStairs) { // HACK
-             if (this.level === 1) {
-                 this.sprite.setDepth(11);
-             } else {
-                 this.sprite.setDepth(1);
+         if(wasOnStairs && !this.onStairs){
+            console.log("FIX Z-index")
+            if(this.level === 10){
+                this.sprite.setDepth(11);
+            }
+            else {
+                this.sprite.setDepth(1);
 
-             }
-         }
+            }
+        }
 
      }
 

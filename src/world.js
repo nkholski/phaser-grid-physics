@@ -71,6 +71,7 @@ export default class World {
                 break;
             case "StaticTilemapLayer":
                 this.tilemaplayers.push(entity);
+                entity.level = entity.level ? entity.level : 0;
                 entity.setOrigin(0,0);
                 if (this.tileGridRatio.x === -1) {
                     this.tileGridRatio.setTo(
@@ -454,12 +455,16 @@ export default class World {
         console.log(map.layers[colLayerIndex]);
     }
 
+    setLayerLevel(layer, level) {
+        layer.level = level;
+    }
+
     addStairs(obj){
         this.stairs.push({
-            x: obj.x/16,
-            y: obj.y/16,
-            width:obj.width/16,
-            height: obj.height/16
+            x: obj.x/8,
+            y: obj.y/8-2,
+            width:obj.width/8,
+            height: obj.height/8
         })
     }
 }

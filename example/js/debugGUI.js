@@ -20,6 +20,7 @@ class debugGUI extends dat.GUI {
         //this.heroFolder.add(that.player, 'debugger').name('Debug body');
         this.heroFolder.add(that.player.body, 'collidable').name('Collidable');
         this.heroFolder.add(that.player.body, 'activeSteps').name('Steps').listen();
+        this.heroFolder.add(that.player.body, 'onStairs').name('onStairs').listen();
         this.heroFolder.open();
        // this.debugFolder.add(that.debugGfx.grid, 'active').name('Grid');
        // this.debugFolder.add(that.debugGfx.collision, 'active').name('Collision');

@@ -93,11 +93,6 @@ class Tilemap {
 
                     let tile = layer.layer.data[checkY][checkX];
 
-                    if(tile.index === -1 && layer.level>0 && level>0){ // HACK
-                        console.log(layer.level);
-                        return true;
-                    }
-
                     if (returnTile) {
                         console.log(tile, checkX, checkY);
                     }
@@ -242,7 +237,6 @@ class Tilemap {
                 }
             }
         }
-        console.log("LEVEL", level);
         return level;
 
 

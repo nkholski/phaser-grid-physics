@@ -20,6 +20,9 @@ class Game extends Phaser.Scene {
         });
         var tiles = map.addTilesetImage('basictiles', 'basictiles');
         let layer = map.createStaticLayer("ground", tiles, 0, 0);
+
+
+    
         layer = map.createStaticLayer("onGround", tiles, 0, 0);
         layer.layer.data.forEach(row => row.forEach(tile => {
             if (!map.tilesets[0].tileProperties.hasOwnProperty(tile.index - 1)) {
@@ -75,17 +78,19 @@ class Game extends Phaser.Scene {
             repeatDelay: 0
         });
 
-        //let layer2 = map.createStaticLayer("above", tiles, 0, 0);
-        //layer2.setDepth(2);
-
+        let layer2 = map.createStaticLayer("above", tiles, 0, 0);
+        this.gridPhysics.world.setLayerLevel(layer2,1);
+        this.gridPhysics.world.enable(layer2);
+        console.log(layer2.layer.data[0][0]);
+        layer2.setDepth(10);
     
         this.player.play("hero/right");
 
         this.gridPhysics.world.enable(this.player);
-        /*this.player.body.gridPosition.x = 48;
-        this.player.body.gridPosition.y = 14;*/
-        this.player.body.gridPosition.x = 25;
-        this.player.body.gridPosition.y = 16;
+        this.player.body.gridPosition.x = 48;
+        this.player.body.gridPosition.y = 14;
+        //this.player.body.gridPosition.x = 25;
+        //this.player.body.gridPosition.y = 16;
         this.player.body.immovable = true;
         this.player.body.baseVelocity = 50;
 
@@ -93,7 +98,7 @@ class Game extends Phaser.Scene {
         this.player.body.collideWorldBounds = true;
         this.player.id = "player";
         this.debugGraphics = this.add.graphics();
-        this.player.setDepth(1);
+        //this.player.setDepth(1);
 
         this.enemies = [];
         let enemy = this.add.sprite(0, 48);
