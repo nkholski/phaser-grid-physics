@@ -4,6 +4,15 @@ The Grid Physics plugin for Phaer is to Arcade physics what Arcade physics is to
 
 The plugin is being developed and there are both bugs and missing features. I'm making this to use it in a RPG project. That means that I'll prioritize those parts I need and that bugs that isn't an issue for my own game isn't attended. One example is that objects migth fly away if they are pushed by severeral bodies at once. If you run into issues that you would like addressed, please open an issue here.
 
+![Walking on bridge](http://metroid.niklasberg.se/P3GridPhysics/gifs/bridge.gif)
+Walking on a bridge and colliding with tiles with collidable borders.
+
+![One way collision](http://metroid.niklasberg.se/P3GridPhysics/gifs/oneway.gif)
+Tested one-way collision, and got stuck.
+
+![Push and turn-based](http://metroid.niklasberg.se/P3GridPhysics/gifs/pushturnbased.gif)
+Turn-based mode with smooth animations plus pushing multiple bodies.
+
 **WARNING: Current state of the plugin** I've done the most basic port from Phaser 2 to Phaser 3. The source is a bit messy but it's a start and enough to run my example demo. Parts of the plugin isn't prepared for general use and contain shortcuts to get the demo running. These shortcuts is all related to the tilemap implementation: A 8x8 pixel grid with 16x16 pixel tiles is required to get all features working, probably also a maximum height of two levels. My next focus will be pathfinding and then cleaning up stuff to make it better prepared for general use.
 
 **Setup instructions** is in the end of this file.
