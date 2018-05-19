@@ -11,15 +11,16 @@
 import World from './world';
 import Tilemap from './tilemap';
 
-class GridPhysics {
-    constructor(scene) {
+class GridPhysics extends Phaser.Plugins.ScenePlugin {
+    constructor(scene, pluginManager) {
+        super(scene, pluginManager);
         Phaser.Physics.GridPhysics = this;
         //  The Scene that owns this plugin
-        this.scene = scene;
+        //this.scene = scene;
         this.world = new World();
         this.tilemap = new Tilemap();
         scene.gridPhysics = this;
-        this.systems = scene.sys;
+        //this.systems = scene.sys;
 
         if (!scene.sys.settings.isBooted) {
             scene.sys.events.once('boot', this.boot, this);

@@ -11,10 +11,10 @@ class Game extends Phaser.Scene {
         this.load.image('basictiles', 'assets/images/basictiles.png');
         this.load.tilemapTiledJSON('map', 'assets/maps/demo.json');
         this.load.atlas('sprites', 'assets/spriteatlas/sprites.png', 'assets/spriteatlas/sprites.json');
-        this.load.plugin('GridPhysics', "GridPhysics.js");
+        this.load.scenePlugin('GridPhysics', "GridPhysics.js", "gridPhysics", "gridPhysics");
     }
     create() {
-        this.sys.install('GridPhysics');
+        //this.sys.install('GridPhysics');
         var map = this.make.tilemap({
             key: 'map'
         });
