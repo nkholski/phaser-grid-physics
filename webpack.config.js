@@ -33,9 +33,8 @@ module.exports = {
                 output: {
                     comments: false
                 },
-                warnings: false
+                warnings: true
             },
-            warningsFilter: (src) => false
         })
 
     ],
