@@ -7,7 +7,6 @@ const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 module.exports = {
     watch: false,
     context: `${__dirname}/src/`,
-
     entry: {
         GridPhysics: './main.js',
         'GridPhysics.min': './main.js'
@@ -47,6 +46,15 @@ module.exports = {
         })
 
     ],
+    optimization: {
+        namedModules: true, // NamedModulesPlugin()
+        splitChunks: { // CommonsChunkPlugin()
+            name: 'vendor',
+            minChunks: 2
+        },
+        noEmitOnErrors: true, // NoEmitOnErrorsPlugin
+        concatenateModules: true //ModuleConcatenationPlugin
+    }
     module: {
         rules: [
           {

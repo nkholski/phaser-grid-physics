@@ -1,4 +1,4 @@
-import "phaser";
+//import "phaser";
 import { ENOMEM } from "constants";
 // States
 import  Game  from './scenes/game';

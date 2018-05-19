@@ -15,13 +15,14 @@ var definePlugin = new webpack.DefinePlugin({
 })
 
 module.exports = {
+    mode: 'development',
     entry: {
         GridPhysics: './src/main.js',
         demo: [
             'babel-polyfill',
             path.resolve(__dirname, 'example/js/main.js')
         ],
-        vendor: ['phaser', 'dat.gui']  
+        vendor: ['phaser', 'dat.gui']
     },
     devtool: 'cheap-source-map',
     output: {
@@ -32,13 +33,9 @@ module.exports = {
         libraryTarget: 'umd',
         filename: '[name].js'
     },
-
-
-    
     watch: true,
     plugins: [
         definePlugin,
-        new webpack.optimize.CommonsChunkPlugin({ name: 'vendor'/* chunkName= */, filename: 'vendor.bundle.js'/* filename= */ }),
         new HtmlWebpackPlugin({
             filename: 'index.html',
             template: './example/index.html',
@@ -56,10 +53,15 @@ module.exports = {
             },
             hash: false
         }),
-        new CopyWebpackPlugin([
-            { from: 'example/assets', to: 'assets' },
-            { from: 'example/js', to: 'js' }
-          ]),
+        new CopyWebpackPlugin([{
+                from: 'example/assets',
+                to: 'assets'
+            },
+            {
+                from: 'example/js',
+                to: 'js'
+            }
+        ]),
         new BrowserSyncPlugin({
             host: process.env.IP || 'localhost',
             port: process.env.PORT || 3000,
@@ -68,29 +70,48 @@ module.exports = {
             }
         })
     ],
+    /*optimization: {
+        namedModules: true,
+        splitChunks: {
+            name: 'vendor',
+            filename: 'vendor.bundle.js'
+        },
+        noEmitOnErrors: true, // NoEmitOnErrorsPlugin
+        concatenateModules: true //ModuleConcatenationPlugin
+    },*/
     module: {
-        rules: [
-            {
+        rules: [{
                 test: /\.js$/, // Check for all js files
                 exclude: /node_modules/,
                 use: [{
-                  loader: 'babel-loader',
-                  options: { presets: ['es2015'] }
+                    loader: 'babel-loader',
+                    options: {
+                        presets: ['es2015']
+                    }
                 }]
-              },
-           // { test: /\.js$/, use: ['babel-loader'], include: path.join(__dirname, 'src') },
-            { test: /phaser-split\.js$/, use: ['expose-loader?Phaser'] },
-            { test: [/\.vert$/, /\.frag$/], use: 'raw-loader' }
-            ]     
+            },
+            // { test: /\.js$/, use: ['babel-loader'], include: path.join(__dirname, 'src') },
+            {
+                test: /phaser-split\.js$/,
+                use: ['expose-loader?Phaser']
+            },
+            {
+                test: [/\.vert$/, /\.frag$/],
+                use: 'raw-loader'
+            }
+        ]
     },
-    node: {
+    /*node: {
         fs: 'empty',
         net: 'empty',
         tls: 'empty'
-    },
-    resolve: {
+    },*/
+    /*resolve: {
         alias: {
             //'GridPhysics': GridPhysics,
         }
+    },*/
+    performance: {
+        hints: false
     }
 }

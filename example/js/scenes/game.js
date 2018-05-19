@@ -1,4 +1,4 @@
-import "phaser";
+//import "phaser";
 import dat from 'dat.gui';
 import debugGUI from '../debugGUI';
 class Game extends Phaser.Scene {
