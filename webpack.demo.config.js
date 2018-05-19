@@ -1,18 +1,14 @@
-var path = require('path')
-var webpack = require('webpack')
-var HtmlWebpackPlugin = require('html-webpack-plugin')
-var BrowserSyncPlugin = require('browser-sync-webpack-plugin')
-var CopyWebpackPlugin = require('copy-webpack-plugin')
-
-// Phaser webpack config
-//var phaserModule = path.join(__dirname, '/node_modules/phaser/')
-//var phaser = path.join(phaserModule, 'src/phaser.js')
+var path = require('path');
+var webpack = require('webpack');
+var HtmlWebpackPlugin = require('html-webpack-plugin');
+var BrowserSyncPlugin = require('browser-sync-webpack-plugin');
+var CopyWebpackPlugin = require('copy-webpack-plugin');
 
 var definePlugin = new webpack.DefinePlugin({
     __DEV__: JSON.stringify(JSON.parse(process.env.BUILD_DEV || 'true')),
     WEBGL_RENDERER: true, // I did this to make webpack work, but I'm not really sure it should always be true
     CANVAS_RENDERER: true // I did this to make webpack work, but I'm not really sure it should always be true
-})
+});
 
 module.exports = {
     mode: 'development',
@@ -70,15 +66,6 @@ module.exports = {
             }
         })
     ],
-    /*optimization: {
-        namedModules: true,
-        splitChunks: {
-            name: 'vendor',
-            filename: 'vendor.bundle.js'
-        },
-        noEmitOnErrors: true, // NoEmitOnErrorsPlugin
-        concatenateModules: true //ModuleConcatenationPlugin
-    },*/
     module: {
         rules: [{
                 test: /\.js$/, // Check for all js files
@@ -90,7 +77,6 @@ module.exports = {
                     }
                 }]
             },
-            // { test: /\.js$/, use: ['babel-loader'], include: path.join(__dirname, 'src') },
             {
                 test: /phaser-split\.js$/,
                 use: ['expose-loader?Phaser']
@@ -101,17 +87,7 @@ module.exports = {
             }
         ]
     },
-    /*node: {
-        fs: 'empty',
-        net: 'empty',
-        tls: 'empty'
-    },*/
-    /*resolve: {
-        alias: {
-            //'GridPhysics': GridPhysics,
-        }
-    },*/
     performance: {
-        hints: false
+        hints: false // Ignore warnings about large bundles as it really don't apply to games
     }
-}
+};
