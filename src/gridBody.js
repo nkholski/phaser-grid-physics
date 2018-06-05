@@ -238,8 +238,7 @@
 
          this.onStairs = false;
 
-         this.sprite.originX = 0;
-         this.sprite.originY = 0;
+         this.sprite.setOrigin(0,0);
 
          this.snapToGrid();
 
@@ -249,10 +248,20 @@
      }
 
      snapToGrid() {
+         console.log("SNAP");
          this.gridPosition = {
              x: Math.round(this.sprite.x / this.world.gridSize.x),
              y: Math.round(this.sprite.y / this.world.gridSize.y),
          };
+         this.sprite.x = this.world.gridSize.x * this.gridPosition.x;
+         this.sprite.y = this.world.gridSize.y * this.gridPosition.y;
+     }
+
+
+     setPosition(x=0, y=0){
+         console.log("flyttar", x, y);
+         this.gridPosition.x = x;
+         this.gridPosition.y = y;
          this.sprite.x = this.world.gridSize.x * this.gridPosition.x;
          this.sprite.y = this.world.gridSize.y * this.gridPosition.y;
      }

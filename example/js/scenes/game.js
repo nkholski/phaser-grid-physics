@@ -85,12 +85,16 @@ class Game extends Phaser.Scene {
         layer2.setDepth(10);
     
         this.player.play("hero/right");
-
+        window.player = this.player;
         this.gridPhysics.world.enable(this.player);
-        this.player.body.gridPosition.x = 48;
-        this.player.body.gridPosition.y = 14;
+        this.player.body.setPosition(48,14);
+   
+      //  this.player.body.gridPosition.x = 48;
+       // this.player.body.gridPosition.y = 14;
+       // this.player.body.snapToGrid();
         //this.player.body.gridPosition.x = 25;
         //this.player.body.gridPosition.y = 16;
+   
         this.player.body.immovable = true;
         this.player.body.baseVelocity = 50;
 
@@ -102,8 +106,8 @@ class Game extends Phaser.Scene {
 
         this.enemies = [];
         let enemy = this.add.sprite(0, 48);
-        enemy.originX = 0;
-        enemy.originY = 0;
+        //enemy.originX = 0;
+        //enemy.originY = 0;
         enemy.tint = 0xFF00FF;
         enemy.id = "enemy1";
         enemy.play("hero/right");
@@ -115,8 +119,8 @@ class Game extends Phaser.Scene {
         this.enemies.push(enemy);
         enemy = this.add.sprite(48, 48 + 32);
         enemy.id = "enemy2";
-        enemy.originX = 0;
-        enemy.originY = 0;
+        //enemy.originX = 0;
+        //enemy.originY = 0;
         enemy.tint = 0xFF00FF;
         enemy.play("hero/right");
         this.gridPhysics.world.enable(enemy);
@@ -135,8 +139,8 @@ class Game extends Phaser.Scene {
                     anim += crateObj.properties.box;
                 }
                 let crate = this.add.sprite(crateObj.x, crateObj.y - 16);
-                crate.originX = 0;
-                crate.originY = 0;
+                //crate.originX = 0;
+                //crate.originY = 0;
                 crate.play("crate");
                 if (crateObj.properties && crateObj.properties.scale) {
                     crate.width = 16 * crateObj.properties.scale;
