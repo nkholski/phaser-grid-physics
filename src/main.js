@@ -14,10 +14,30 @@ import Tilemap from './tilemap';
 class GridPhysics extends Phaser.Plugins.ScenePlugin {
     constructor(scene, pluginManager) {
         super(scene, pluginManager);
+       
+        let config = scene.registry.parent.config.physics.grid;
+        if(scene.registry.parent.config.physics.grid) {
+            let gridSize =  config.gridSize;
+            if(!gridSize){
+                gridSize = {x: 8, y: 8};
+            }
+            if(typeof(gridSize) === "number"){
+                gridSize = { x: gridSize, y: gridSize};
+            }
+            else if(!gridSize.hasOwnProperty('x') || !gridSize.hasOwnProperty('y')){
+                gridSize = {x: 8, y: 8};
+            }
+            config = {
+                debug: config.debug ? true : false,
+                gridSize
+            };
+        }
+        
+
         Phaser.Physics.GridPhysics = this;
         //  The Scene that owns this plugin
         //this.scene = scene;
-        this.world = new World();
+        this.world = new World(scene, config);
         this.tilemap = new Tilemap();
         scene.gridPhysics = this;
         //this.systems = scene.sys;

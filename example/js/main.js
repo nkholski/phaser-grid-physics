@@ -15,6 +15,7 @@ let config = {
     physics: {
         grid: {
             debug: true,
+            gridSize: 8
         }
     }
 };

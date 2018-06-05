@@ -529,6 +529,36 @@
          }
          return false;
      }
+    
+     /**
+     * Draws this Body's boundary and velocity, if enabled.
+     *
+     * @method Phaser.Physics.Arcade.Body#drawDebug
+     * @since 3.0.0
+     *
+     * @param {Phaser.GameObjects.Graphics} graphic - The Graphics object to draw on.
+     */
+    
+    drawDebug(graphic)
+    {
+        let x = this.gridPosition.x * this.world.gridSize.x;
+        let y = this.gridPosition.y * this.world.gridSize.y;
+        let w = this.width * this.world.gridSize.x;
+        let h = this.height * this.world.gridSize.y;
+
+        if (true || this.debugShowBody)
+        {
+            graphic.lineStyle(1, "0xFFFFFF"); //this.debugBodyColor
+
+             graphic.strokeRect(x, y, w, h);
+            
+        }
+        /*if (this.debugShowVelocity)
+        {
+            graphic.lineStyle(1, this.world.defaults.velocityDebugColor, 1);
+            graphic.lineBetween(x, y, x + this.velocity.x / 2, y + this.velocity.y / 2);
+        }*/
+    }
 
      /*renderDebugBody() {
          if (!this.debugBody) {

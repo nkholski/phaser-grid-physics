@@ -2,12 +2,15 @@ import GridBody from './gridBody';
 
 export default class World {
 
-    constructor(game) {
+    constructor(scene, config) {
         this.cnt = 0;
 
+        this.scene = scene;
+
         // Size of Grid in pixels
-        this.gridSize = new Phaser.Geom.Point(8);
- 
+        this.gridSize = new Phaser.Geom.Point(config.gridSize.x, config.gridSize.y);
+
+
         // Shadow size in pixels.
         this.shadowSize = 0;
 
@@ -27,6 +30,7 @@ export default class World {
         this.stairs = [];
 
         this.map = null;
+
 
         this.debugGfx = {
             graphics: null,
@@ -62,6 +66,9 @@ export default class World {
 
 
         this.showWarnings = true;
+
+        this.drawDebug = config.debug ? this.createDebugGraphic() : false;
+        
 
     }
 
@@ -226,9 +233,19 @@ export default class World {
 
             }
         }
-        if (this.debugGfx.update) {
-            this.renderDebug();
 
+        if (this.drawDebug)
+        {
+            var graphics = this.debugGraphic;
+
+            graphics.clear();
+
+            this.bodies.forEach((body)=>{
+                //if (body && body.willDrawDebug())
+                //{
+                   body.drawDebug(graphics);
+                //}
+            });
         }
     }
 
@@ -476,4 +493,26 @@ export default class World {
             height: obj.height/this.gridSize.y
         })
     }
+
+        /**
+     * Creates the graphics object responsible for debug display.
+     *
+     * @method Phaser.Physics.Arcade.World#createDebugGraphic
+     * @since 3.0.0
+     *
+     * @return {Phaser.GameObjects.Graphics} [description]
+     */
+    createDebugGraphic()
+    {
+        var graphic = this.scene.sys.add.graphics({ x: 0, y: 0 });
+
+        graphic.setDepth(Number.MAX_VALUE);
+
+        this.debugGraphic = graphic;
+
+        return true;
+    }
+
+
+
 }
