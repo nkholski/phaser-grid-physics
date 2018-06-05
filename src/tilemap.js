@@ -68,11 +68,14 @@ class Tilemap {
                         continue;
                     }
                     //let tile = this.world.map.getTileAt(Math.floor(x * this.world.gridSize.x / layer.collisionWidth), Math.floor(y * this.world.gridSize.y / layer.collisionHeight), layer, true);
-                    layer.collisionHeight = 16;
-                    layer.collisionWidth = 16;
+                    let collisionHeight = layer.layer.baseTileHeight;
+                    let collisionWidth = layer.layer.baseTileHeight;
+
+                    //layer.collisionWidth = 16;
                     //let tile = this.world.getTileAt(Math.floor(x * this.world.gridSize.x / layer.collisionWidth), Math.floor(y * this.world.gridSize.y / layer.collisionHeight), layer, true);
                     //debugger;
-                    let checkY = Math.floor(y * this.world.gridSize.y / layer.collisionHeight);
+             
+                    let checkY = Math.floor(y * this.world.gridSize.y / collisionHeight);
                     let checkX;
                     if (checkY < 0 || checkY > layer.layer.data.length - 1) {
                         if (this.collideWorldBounds) {
@@ -81,7 +84,7 @@ class Tilemap {
                             continue;
                         }
                     } else {
-                        checkX = Math.floor(x * this.world.gridSize.x / layer.collisionWidth);
+                        checkX = Math.floor(x * this.world.gridSize.x / collisionWidth);
                         if (checkX < 0 || checkY > layer.layer.data[checkY].length - 1) {
                             if (this.collideWorldBounds) {
                                 return true;

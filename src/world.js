@@ -7,7 +7,7 @@ export default class World {
 
         // Size of Grid in pixels
         this.gridSize = new Phaser.Geom.Point(8);
-
+ 
         // Shadow size in pixels.
         this.shadowSize = 0;
 
@@ -61,6 +61,8 @@ export default class World {
         this.collisionMap = null;
 
 
+        this.showWarnings = true;
+
     }
 
     enable(entity) {
@@ -70,6 +72,10 @@ export default class World {
                 this.bodies.push(entity.body);
                 break;
             case "StaticTilemapLayer":
+                if( this.showWarnings && entity.collisionWidth % this.gridSize.x !== 0 || entity.collisionWidth % this.gridSize.x !==0 ){
+                    console.warn("Tile size isn't an even multiplier of the grid size. This will probably break your game.");
+
+                }
                 this.tilemaplayers.push(entity);
                 entity.level = entity.level ? entity.level : 0;
                 entity.setOrigin(0,0);
@@ -385,6 +391,9 @@ export default class World {
         //let map = this.map;
         console.log("WHAT");
         let map = layer.tilemap;
+        layer.collisionWidth = map.tileWidth;
+        layer.collisionHeight = map.tileHeight;
+        console.log(layer.collisionHeigh, map, layer)
        // console.log(layer, map, "what")
         let colLayerIndex = map.getLayerIndex("gridPhysicsCollision");
         console.log("COL", layer);
@@ -461,10 +470,10 @@ export default class World {
 
     addStairs(obj){
         this.stairs.push({
-            x: obj.x/8,
-            y: obj.y/8-2,
-            width:obj.width/8,
-            height: obj.height/8
+            x: obj.x/this.gridSize.x,
+            y: obj.y/this.gridSize.y-2, // Don't remember why -2 is there. Remove?
+            width:obj.width/this.gridSize.x,
+            height: obj.height/this.gridSize.y
         })
     }
 }
