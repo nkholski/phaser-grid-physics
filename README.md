@@ -1,6 +1,6 @@
 # Grid Physics for Phaser
 
-The Grid Physics plugin for Phaer is to Arcade physics what Arcade physics is to Matter.js. :-) The plugin adds support for grid/tile based movement along with some other stuff to make your life easier doing games with grid restricted movement. My aim is to build the API as close as possible to Arcade physics.
+The Grid Physics plugin for Phaser is to Arcade physics what Arcade physics is to Matter.js. :-) The plugin adds support for grid/tile based movement along with some other stuff to make your life easier doing games with grid restricted movement. My aim is to build the API as close as possible to Arcade physics.
 
 The plugin is being developed and there are both bugs and missing features. I'm making this to use it in a RPG project. That means that I'll prioritize those parts I need and that bugs that isn't an issue for my own game isn't attended. One example is that objects migth fly away if they are pushed by severeral bodies at once. If you run into issues that you would like addressed, please open an issue here.
 
