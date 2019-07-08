@@ -1,11 +1,12 @@
 {
   "name": "phaser-grid-physics",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Phaser 3 Grid Physics Plugin",
   "main": "src/main.js",
   "scripts": {
     "build": "webpack",
-    "dev": "webpack --config webpack.demo.config.js"
+    "dev": "webpack --config webpack.demo.config.js",
+    "serve": "webpack --config webpack.demo.config.js"
   },
   "repository": {
     "type": "git",
