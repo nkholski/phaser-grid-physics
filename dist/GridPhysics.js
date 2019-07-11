@@ -139,7 +139,7 @@ var Tilemap = function () {
         collideWorldBounds = source.hasOwnProperty("collideWorldBounds") ? source.collideWorldBounds : false;
         returnTile = true;
         level = source.level ? source.level : 0;
-        callback = source.collisionCallback;
+        callback = source.collisionCallback ? source.body.collisionCallback.tile : null;
       }
       // Prevent going outside the tilemap?
 
@@ -334,12 +334,31 @@ var Tilemap = function () {
       var tileScaleY = 2;
       var tiles = [];
 
+      var startX = Math.floor(x / tileScaleX);
+      startX = startX < 0 ? 0 : startX;
+
+      var startY = Math.floor(y / tileScaleY);
+      startY = startY < 0 ? 0 : startY;
+
+      var stopX = (x + width) / tileScaleX;
+      stopX = stopX > this.world.tilemaplayers[0].tilemap.width ? this.world.tilemaplayers[0].tilemap.width : stopX;
+
+      var stopY = (y + height) / tileScaleY;
+      stopY = stopY > this.world.tilemaplayers[0].tilemap.height ? this.world.tilemaplayers[0].tilemap.height : stopY;
+
+      console.log("x=", this.world.tilemaplayers[0].tilemap.width, "y=", this.world.tilemaplayers[0].tilemap.height);
+
       this.world.tilemaplayers.forEach(function (layer, layerIndex) {
         tiles[layerIndex] = [];
-        for (var checkX = x; checkX < x + width; checkX += tileScaleX) {
-          for (var checkY = y; checkY < y + height; checkY += tileScaleY) {
-            var tile = layer.layer.data[checkY][checkX] || null;
-            tiles[layerIndex].push(tile);
+
+        var tilesToCheck = layer.data || layer.culledTiles;
+
+        for (var checkX = startX; checkX < stopX; checkX += tileScaleX) {
+          for (var checkY = startY; checkY < stopY; checkY += tileScaleY) {
+            var tile = tilesToCheck[checkY][checkX] || null;
+            if (tile) {
+              tiles[layerIndex].push(tile);
+            }
           }
         }
       });
@@ -761,6 +780,9 @@ var GridBody = function () {
       }
 
       if (this.tilemap.collide(this.sprite, dx, dy) && this.solid) {
+        if (this.collisionCallback.body) {
+          console.log("collide");
+        }
         return false;
       }
 
@@ -768,7 +790,6 @@ var GridBody = function () {
         return false;
       }
 
-      // Kolla först tilemap för det kan bli krock direkt!
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
       var _iteratorError = undefined;

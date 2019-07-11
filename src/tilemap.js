@@ -42,7 +42,9 @@ class Tilemap {
         : false;
       returnTile = true;
       level = source.level ? source.level : 0;
-      callback = source.collisionCallback;
+      callback = source.collisionCallback
+        ? source.body.collisionCallback.tile
+        : null;
     }
     // Prevent going outside the tilemap?
 
@@ -233,12 +235,35 @@ class Tilemap {
     const tileScaleY = 2;
     const tiles = [];
 
+    let startX = Math.floor(x / tileScaleX);
+    startX = startX < 0 ? 0 : startX;
+
+    let startY = Math.floor(y / tileScaleY);
+    startY = startY < 0 ? 0 : startY;
+
+    let stopX = (x + width) / tileScaleX;
+    stopX =
+      stopX > this.world.tilemaplayers[0].tilemap.width
+        ? this.world.tilemaplayers[0].tilemap.width
+        : stopX;
+
+    let stopY = (y + height) / tileScaleY;
+    stopY =
+      stopY > this.world.tilemaplayers[0].tilemap.height
+        ? this.world.tilemaplayers[0].tilemap.height
+        : stopY;
+
     this.world.tilemaplayers.forEach((layer, layerIndex) => {
       tiles[layerIndex] = [];
-      for (let checkX = x; checkX < x + width; checkX += tileScaleX) {
-        for (let checkY = y; checkY < y + height; checkY += tileScaleY) {
-          const tile = layer.layer.data[checkY][checkX] || null;
-          tiles[layerIndex].push(tile);
+
+      const tilesToCheck = layer.data || layer.culledTiles;
+
+      for (let checkX = startX; checkX < stopX; checkX += tileScaleX) {
+        for (let checkY = startY; checkY < stopY; checkY += tileScaleY) {
+          const tile = tilesToCheck[checkY][checkX] || null;
+          if (tile) {
+            tiles[layerIndex].push(tile);
+          }
         }
       }
     });

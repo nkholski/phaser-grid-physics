@@ -305,6 +305,9 @@ class GridBody {
     }
 
     if (this.tilemap.collide(this.sprite, dx, dy) && this.solid) {
+      if (this.collisionCallback.body) {
+        console.log("collide");
+      }
       return false;
     }
 
@@ -312,7 +315,6 @@ class GridBody {
       return false;
     }
 
-    // Kolla först tilemap för det kan bli krock direkt!
     for (let body of this.world.bodies) {
       const bodyIsSolid = this.collisionCallback.body
         ? this.collisionCallback.body(body, this)
