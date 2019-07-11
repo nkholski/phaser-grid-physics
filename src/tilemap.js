@@ -11,7 +11,13 @@ class Tilemap {
     layers = this.world.tilemaplayers,
     slide = false
   ) {
-    let position, width, height, collideWorldBounds, returnTile, level;
+    let position,
+      width,
+      height,
+      collideWorldBounds,
+      returnTile,
+      level,
+      callback;
 
     // Sort out variables to work with, either from a sprite with a body or just an object
     if (source.hasOwnProperty("body")) {
@@ -23,6 +29,7 @@ class Tilemap {
       height = source.body.height;
       collideWorldBounds = source.body.collideWorldBounds;
       level = source.body.level;
+      callback = source.body.collisionCallback.tile;
     } else {
       position = {
         x: source.x,
@@ -35,8 +42,10 @@ class Tilemap {
         : false;
       returnTile = true;
       level = source.level ? source.level : 0;
+      callback = source.collisionCallback;
     }
-    // Prevent goint outside the tilemap?
+    // Prevent going outside the tilemap?
+
     if (
       collideWorldBounds &&
       (position.x + dx < 0 ||
@@ -48,7 +57,6 @@ class Tilemap {
     ) {
       return true;
     }
-
     // Update the position to the attempted movement
     position.x += dx;
     position.y += dy;
@@ -66,10 +74,6 @@ class Tilemap {
       height = 1;
     }
 
-    let tileRatio = {
-      x: 2,
-      y: 2
-    };
     for (let x = position.x; x < position.x + width; x++) {
       for (let y = position.y; y < position.y + height; y++) {
         let collide = false;
@@ -77,6 +81,7 @@ class Tilemap {
           if (level > layer.level) {
             continue;
           }
+
           //let tile = this.world.map.getTileAt(Math.floor(x * this.world.gridSize.x / layer.collisionWidth), Math.floor(y * this.world.gridSize.y / layer.collisionHeight), layer, true);
           let collisionHeight = layer.layer.baseTileHeight;
           let collisionWidth = layer.layer.baseTileHeight;
@@ -123,30 +128,32 @@ class Tilemap {
             continue;
           }
 
+          const tileCollider = callback ? callback(tile) : tile;
+
           if (
-            tile.collideRight &&
-            tile.collideLeft &&
-            tile.collideDown &&
-            tile.collideUp
+            tileCollider.collideRight &&
+            tileCollider.collideLeft &&
+            tileCollider.collideDown &&
+            tileCollider.collideUp
           ) {
             // tile collides whatever direction the body enter
             collide = true;
             break;
-          } else if (dx < 0 && tile.collideRight) {
+          } else if (dx < 0 && tileCollider.collideRight) {
             // moving left and the tile collides from the right
             //console.log("Collide RIGHT", tile)
             collide = true;
             break;
-          } else if (dx > 0 && tile.collideLeft) {
+          } else if (dx > 0 && tileCollider.collideLeft) {
             //console.log("Collide KEFT", tile)
             collide = true;
             break;
           }
-          if (dy < 0 && tile.collideDown) {
+          if (dy < 0 && tileCollider.collideDown) {
             //console.log("Collide DOWN", tile)
             collide = true;
             break;
-          } else if (dy > 0 && tile.collideUp) {
+          } else if (dy > 0 && tileCollider.collideUp) {
             //console.log("Collide UP", tile)
             collide = true;
             break;
@@ -210,6 +217,32 @@ class Tilemap {
       }
     }
     return false;
+  }
+
+  getTilesUnderBody(body) {
+    return this.getTilesAt(
+      body.gridPosition.x,
+      body.gridPosition.y,
+      body.width,
+      body.height
+    );
+  }
+
+  getTilesAt(x, y, width, height) {
+    const tileScaleX = 2;
+    const tileScaleY = 2;
+    const tiles = [];
+
+    this.world.tilemaplayers.forEach((layer, layerIndex) => {
+      tiles[layerIndex] = [];
+      for (let checkX = x; checkX < x + width; checkX += tileScaleX) {
+        for (let checkY = y; checkY < y + height; checkY += tileScaleY) {
+          const tile = layer.layer.data[checkY][checkX] || null;
+          tiles[layerIndex].push(tile);
+        }
+      }
+    });
+    return tiles;
   }
 
   checkLevel(source, dx, dy) {

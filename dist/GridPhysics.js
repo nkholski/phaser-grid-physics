@@ -115,7 +115,8 @@ var Tilemap = function () {
           height = void 0,
           collideWorldBounds = void 0,
           returnTile = void 0,
-          level = void 0;
+          level = void 0,
+          callback = void 0;
 
       // Sort out variables to work with, either from a sprite with a body or just an object
       if (source.hasOwnProperty("body")) {
@@ -127,6 +128,7 @@ var Tilemap = function () {
         height = source.body.height;
         collideWorldBounds = source.body.collideWorldBounds;
         level = source.body.level;
+        callback = source.body.collisionCallback.tile;
       } else {
         position = {
           x: source.x,
@@ -137,12 +139,13 @@ var Tilemap = function () {
         collideWorldBounds = source.hasOwnProperty("collideWorldBounds") ? source.collideWorldBounds : false;
         returnTile = true;
         level = source.level ? source.level : 0;
+        callback = source.collisionCallback;
       }
-      // Prevent goint outside the tilemap?
+      // Prevent going outside the tilemap?
+
       if (collideWorldBounds && (position.x + dx < 0 || position.y + dy < 0 || position.x + dx + width > this.world.tilemaplayers[0].width / this.world.gridSize.x || position.y + dy + height > this.world.tilemaplayers[0].height / this.world.gridSize.y)) {
         return true;
       }
-
       // Update the position to the attempted movement
       position.x += dx;
       position.y += dy;
@@ -160,10 +163,6 @@ var Tilemap = function () {
         height = 1;
       }
 
-      var tileRatio = {
-        x: 2,
-        y: 2
-      };
       for (var x = position.x; x < position.x + width; x++) {
         for (var y = position.y; y < position.y + height; y++) {
           var collide = false;
@@ -178,6 +177,7 @@ var Tilemap = function () {
               if (level > layer.level) {
                 continue;
               }
+
               //let tile = this.world.map.getTileAt(Math.floor(x * this.world.gridSize.x / layer.collisionWidth), Math.floor(y * this.world.gridSize.y / layer.collisionHeight), layer, true);
               var collisionHeight = layer.layer.baseTileHeight;
               var collisionWidth = layer.layer.baseTileHeight;
@@ -222,25 +222,27 @@ var Tilemap = function () {
                 continue;
               }
 
-              if (tile.collideRight && tile.collideLeft && tile.collideDown && tile.collideUp) {
+              var tileCollider = callback ? callback(tile) : tile;
+
+              if (tileCollider.collideRight && tileCollider.collideLeft && tileCollider.collideDown && tileCollider.collideUp) {
                 // tile collides whatever direction the body enter
                 collide = true;
                 break;
-              } else if (dx < 0 && tile.collideRight) {
+              } else if (dx < 0 && tileCollider.collideRight) {
                 // moving left and the tile collides from the right
                 //console.log("Collide RIGHT", tile)
                 collide = true;
                 break;
-              } else if (dx > 0 && tile.collideLeft) {
+              } else if (dx > 0 && tileCollider.collideLeft) {
                 //console.log("Collide KEFT", tile)
                 collide = true;
                 break;
               }
-              if (dy < 0 && tile.collideDown) {
+              if (dy < 0 && tileCollider.collideDown) {
                 //console.log("Collide DOWN", tile)
                 collide = true;
                 break;
-              } else if (dy > 0 && tile.collideUp) {
+              } else if (dy > 0 && tileCollider.collideUp) {
                 //console.log("Collide UP", tile)
                 collide = true;
                 break;
@@ -319,6 +321,29 @@ var Tilemap = function () {
         }
       }
       return false;
+    }
+  }, {
+    key: "getTilesUnderBody",
+    value: function getTilesUnderBody(body) {
+      return this.getTilesAt(body.gridPosition.x, body.gridPosition.y, body.width, body.height);
+    }
+  }, {
+    key: "getTilesAt",
+    value: function getTilesAt(x, y, width, height) {
+      var tileScaleX = 2;
+      var tileScaleY = 2;
+      var tiles = [];
+
+      this.world.tilemaplayers.forEach(function (layer, layerIndex) {
+        tiles[layerIndex] = [];
+        for (var checkX = x; checkX < x + width; checkX += tileScaleX) {
+          for (var checkY = y; checkY < y + height; checkY += tileScaleY) {
+            var tile = layer.layer.data[checkY][checkX] || null;
+            tiles[layerIndex].push(tile);
+          }
+        }
+      });
+      return tiles;
     }
   }, {
     key: "checkLevel",
@@ -650,6 +675,16 @@ var GridBody = function () {
      */
     this.passiveSteps = 0;
 
+    /**
+     *  Callbacks can override collisions. This is just for blocking behaviour. Set collectCollidingBodies to populate colliding bodies and getTilesUnderBody() to get all tiles a body i positioned over.
+     *  @property {Function} tile - Takes a tile and return new collision up, right, down and left values.
+     *  @property {Function} body - Takes a two bodies and return boolean weather the first should be considered solid
+     */
+    this.collisionCallback = {
+      tile: null,
+      body: null
+    };
+
     this.myTurn = false;
     this.turns = 0;
     this.reload = 1;
@@ -708,6 +743,11 @@ var GridBody = function () {
       return !(r2.x >= r1.x + r1.width || r2.x + r2.width <= r1.x || r2.y >= r1.y + r1.height || r2.y + r2.height <= r1.y);
     }
   }, {
+    key: "getTilesUnderBody",
+    value: function getTilesUnderBody() {
+      return this.tilemap.getTilesUnderBody(this);
+    }
+  }, {
     key: "testMove",
     value: function testMove(dx, dy) {
       var freeToGo = true;
@@ -737,6 +777,8 @@ var GridBody = function () {
         for (var _iterator = this.world.bodies[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var body = _step.value;
 
+          var bodyIsSolid = this.collisionCallback.body ? this.collisionCallback.body(body, this) : body.solid;
+
           if (this !== body && body.collidable && (body.level === this.level || body.onStairs)) {
             // If not able to move and neither body is collecting colliding bodies, skip further checks
             if (!freeToGo && !this.collectCollidingBodies && !body.collectCollidingBodies) {
@@ -763,7 +805,7 @@ var GridBody = function () {
               }
 
               // Check how the other body might affect this one
-              if (!this.solid || !body.solid) {
+              if (!this.solid || !bodyIsSolid) {
                 continue;
               }
 

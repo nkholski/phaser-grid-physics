@@ -226,6 +226,16 @@ class GridBody {
      */
     this.passiveSteps = 0;
 
+    /**
+     *  Callbacks can override collisions. This is just for blocking behaviour. Set collectCollidingBodies to populate colliding bodies and getTilesUnderBody() to get all tiles a body i positioned over.
+     *  @property {Function} tile - Takes a tile and return new collision up, right, down and left values.
+     *  @property {Function} body - Takes a two bodies and return boolean weather the first should be considered solid
+     */
+    this.collisionCallback = {
+      tile: null,
+      body: null
+    };
+
     this.myTurn = false;
     this.turns = 0;
     this.reload = 1;
@@ -279,6 +289,10 @@ class GridBody {
     );
   }
 
+  getTilesUnderBody() {
+    return this.tilemap.getTilesUnderBody(this);
+  }
+
   testMove(dx, dy) {
     let freeToGo = true;
 
@@ -300,6 +314,10 @@ class GridBody {
 
     // Kolla först tilemap för det kan bli krock direkt!
     for (let body of this.world.bodies) {
+      const bodyIsSolid = this.collisionCallback.body
+        ? this.collisionCallback.body(body, this)
+        : body.solid;
+
       if (
         this !== body &&
         body.collidable &&
@@ -345,7 +363,7 @@ class GridBody {
           }
 
           // Check how the other body might affect this one
-          if (!this.solid || !body.solid) {
+          if (!this.solid || !bodyIsSolid) {
             continue;
           }
 

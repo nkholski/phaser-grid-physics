@@ -96,7 +96,6 @@ class Game extends Phaser.Scene {
     let layer2 = map.createStaticLayer("above", tiles, 0, 0);
     this.gridPhysics.world.setLayerLevel(layer2, 1);
     this.gridPhysics.world.enable(layer2);
-    console.log(layer2.layer.data[0][0]);
     layer2.setDepth(10);
 
     this.player.play("hero/right");
@@ -112,7 +111,20 @@ class Game extends Phaser.Scene {
 
     this.player.body.immovable = true;
     this.player.body.baseVelocity = 50;
+    /*this.player.body.collisionCallback.tile = tile => {
+      console.log("DOING");
+      const modifiedTile = tile;
+      modifiedTile.collideUp = false;
+      modifiedTile.collideDown = false;
+      modifiedTile.collideLeft = false;
+      modifiedTile.collideRight = false;
 
+      return modifiedTile;
+    };
+
+    this.player.body.collisionCallback.body = (collidingBody, myBody) => {
+      return false;
+    };*/
     this.player.body.strength = -1;
     this.player.body.collideWorldBounds = true;
     this.player.id = "player";
@@ -196,7 +208,6 @@ class Game extends Phaser.Scene {
   }
 
   update(time, delta) {
-    console.log(this.player.body.collidingBodies);
     //console.log(this.gridPhysics.world.firstInLine.id);
     if (this.gridPhysics.world.firstInLine.body.justMoved) {
       this.gridPhysics.world.nextTurn();
