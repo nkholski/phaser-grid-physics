@@ -202,7 +202,10 @@ export default class World {
     this.turnMade = false;
     let elapsedTime = delta / 1000; //body.game.time.physicsElapsed
 
-    for (let body of this.bodies) {
+    for (const body of this.bodies) {
+      if (!body.sprite.active) {
+        continue;
+      }
       let next = {
         x: body.sprite.x,
         y: body.sprite.y
@@ -248,6 +251,11 @@ export default class World {
       this.bodies.forEach(body => {
         //if (body && body.willDrawDebug())
         //{
+        // if (!body.sprite.active) {
+        //   console.log(body);
+        //   debugger;
+        //   return;
+        // }
         body.drawDebug(graphics);
         //}
       });

@@ -222,6 +222,14 @@ class Tilemap {
   }
 
   getTilesUnderBody(body) {
+    console.log(
+      "Check",
+      body.gridPosition.x,
+      body.gridPosition.y,
+      body.width,
+      body.height
+    );
+
     return this.getTilesAt(
       body.gridPosition.x,
       body.gridPosition.y,
@@ -241,26 +249,26 @@ class Tilemap {
     let startY = Math.floor(y / tileScaleY);
     startY = startY < 0 ? 0 : startY;
 
-    let stopX = (x + width) / tileScaleX;
+    let stopX = Math.floor((x + width) / tileScaleX);
     stopX =
       stopX > this.world.tilemaplayers[0].tilemap.width
         ? this.world.tilemaplayers[0].tilemap.width
         : stopX;
 
-    let stopY = (y + height) / tileScaleY;
+    let stopY = Math.floor(y + height) / tileScaleY;
     stopY =
       stopY > this.world.tilemaplayers[0].tilemap.height
         ? this.world.tilemaplayers[0].tilemap.height
         : stopY;
 
+    console.log(`scan x=${startX} to ${stopX} amd y=${startY} to ${stopY}`);
+
     this.world.tilemaplayers.forEach((layer, layerIndex) => {
       tiles[layerIndex] = [];
 
-      const tilesToCheck = layer.data || layer.culledTiles;
-
       for (let checkX = startX; checkX < stopX; checkX += tileScaleX) {
         for (let checkY = startY; checkY < stopY; checkY += tileScaleY) {
-          const tile = tilesToCheck[checkY][checkX] || null;
+          const tile = layer.layer.data[checkY][checkX] || null;
           if (tile) {
             tiles[layerIndex].push(tile);
           }

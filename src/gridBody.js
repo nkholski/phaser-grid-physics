@@ -290,6 +290,7 @@ class GridBody {
   }
 
   getTilesUnderBody() {
+    console.log("check", this);
     return this.tilemap.getTilesUnderBody(this);
   }
 
@@ -305,9 +306,6 @@ class GridBody {
     }
 
     if (this.tilemap.collide(this.sprite, dx, dy) && this.solid) {
-      if (this.collisionCallback.body) {
-        console.log("collide");
-      }
       return false;
     }
 
@@ -316,15 +314,11 @@ class GridBody {
     }
 
     for (let body of this.world.bodies) {
-      const bodyIsSolid = this.collisionCallback.body
-        ? this.collisionCallback.body(body, this)
-        : body.solid;
+      if (this === body || !body.sprite.active) {
+        continue;
+      }
 
-      if (
-        this !== body &&
-        body.collidable &&
-        (body.level === this.level || body.onStairs)
-      ) {
+      if (body.collidable && (body.level === this.level || body.onStairs)) {
         // If not able to move and neither body is collecting colliding bodies, skip further checks
         if (
           !freeToGo &&
@@ -363,6 +357,10 @@ class GridBody {
           ) {
             body.collidingBodies.push(this);
           }
+          // Collision callback
+          const bodyIsSolid = this.collisionCallback.body
+            ? this.collisionCallback.body(body, this)
+            : body.solid;
 
           // Check how the other body might affect this one
           if (!this.solid || !bodyIsSolid) {
@@ -594,7 +592,9 @@ class GridBody {
 
     if (true || this.debugShowBody) {
       graphic.lineStyle(1, "0xFFFFFF"); //this.debugBodyColor
-
+      if (!this.sprite.active) {
+        graphic.lineStyle(1, "0xFF0000"); //this.debugBodyColor
+      }
       graphic.strokeRect(x, y, w, h);
     }
     /*if (this.debugShowVelocity)

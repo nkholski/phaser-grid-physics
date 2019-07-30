@@ -325,6 +325,8 @@ var Tilemap = function () {
   }, {
     key: "getTilesUnderBody",
     value: function getTilesUnderBody(body) {
+      console.log("Check", body.gridPosition.x, body.gridPosition.y, body.width, body.height);
+
       return this.getTilesAt(body.gridPosition.x, body.gridPosition.y, body.width, body.height);
     }
   }, {
@@ -340,22 +342,20 @@ var Tilemap = function () {
       var startY = Math.floor(y / tileScaleY);
       startY = startY < 0 ? 0 : startY;
 
-      var stopX = (x + width) / tileScaleX;
+      var stopX = Math.floor((x + width) / tileScaleX);
       stopX = stopX > this.world.tilemaplayers[0].tilemap.width ? this.world.tilemaplayers[0].tilemap.width : stopX;
 
-      var stopY = (y + height) / tileScaleY;
+      var stopY = Math.floor(y + height) / tileScaleY;
       stopY = stopY > this.world.tilemaplayers[0].tilemap.height ? this.world.tilemaplayers[0].tilemap.height : stopY;
 
-      console.log("x=", this.world.tilemaplayers[0].tilemap.width, "y=", this.world.tilemaplayers[0].tilemap.height);
+      console.log("scan x=" + startX + " to " + stopX + " amd y=" + startY + " to " + stopY);
 
       this.world.tilemaplayers.forEach(function (layer, layerIndex) {
         tiles[layerIndex] = [];
 
-        var tilesToCheck = layer.data || layer.culledTiles;
-
         for (var checkX = startX; checkX < stopX; checkX += tileScaleX) {
           for (var checkY = startY; checkY < stopY; checkY += tileScaleY) {
-            var tile = tilesToCheck[checkY][checkX] || null;
+            var tile = layer.layer.data[checkY][checkX] || null;
             if (tile) {
               tiles[layerIndex].push(tile);
             }
@@ -764,6 +764,7 @@ var GridBody = function () {
   }, {
     key: "getTilesUnderBody",
     value: function getTilesUnderBody() {
+      console.log("check", this);
       return this.tilemap.getTilesUnderBody(this);
     }
   }, {
@@ -780,9 +781,6 @@ var GridBody = function () {
       }
 
       if (this.tilemap.collide(this.sprite, dx, dy) && this.solid) {
-        if (this.collisionCallback.body) {
-          console.log("collide");
-        }
         return false;
       }
 
@@ -798,9 +796,11 @@ var GridBody = function () {
         for (var _iterator = this.world.bodies[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var body = _step.value;
 
-          var bodyIsSolid = this.collisionCallback.body ? this.collisionCallback.body(body, this) : body.solid;
+          if (this === body || !body.sprite.active) {
+            continue;
+          }
 
-          if (this !== body && body.collidable && (body.level === this.level || body.onStairs)) {
+          if (body.collidable && (body.level === this.level || body.onStairs)) {
             // If not able to move and neither body is collecting colliding bodies, skip further checks
             if (!freeToGo && !this.collectCollidingBodies && !body.collectCollidingBodies) {
               continue;
@@ -824,6 +824,8 @@ var GridBody = function () {
               if (body.collectCollidingBodies && body.collidingBodies.indexOf(this) === -1) {
                 body.collidingBodies.push(this);
               }
+              // Collision callback
+              var bodyIsSolid = this.collisionCallback.body ? this.collisionCallback.body(body, this) : body.solid;
 
               // Check how the other body might affect this one
               if (!this.solid || !bodyIsSolid) {
@@ -1133,7 +1135,9 @@ var GridBody = function () {
 
       if (true) {
         graphic.lineStyle(1, "0xFFFFFF"); //this.debugBodyColor
-
+        if (!this.sprite.active) {
+          graphic.lineStyle(1, "0xFF0000"); //this.debugBodyColor
+        }
         graphic.strokeRect(x, y, w, h);
       }
       /*if (this.debugShowVelocity)
@@ -1573,6 +1577,9 @@ var World = function () {
         for (var _iterator = this.bodies[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var body = _step.value;
 
+          if (!body.sprite.active) {
+            continue;
+          }
           var next = {
             x: body.sprite.x,
             y: body.sprite.y
@@ -1625,6 +1632,11 @@ var World = function () {
         this.bodies.forEach(function (body) {
           //if (body && body.willDrawDebug())
           //{
+          // if (!body.sprite.active) {
+          //   console.log(body);
+          //   debugger;
+          //   return;
+          // }
           body.drawDebug(graphics);
           //}
         });
@@ -1978,97 +1990,97 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 //
 // This plugin is based on Photonstorms Phaser 3 plugin template with added support for ES6.
-// 
+//
 
 var GridPhysics = function (_Phaser$Plugins$Scene) {
-    _inherits(GridPhysics, _Phaser$Plugins$Scene);
+  _inherits(GridPhysics, _Phaser$Plugins$Scene);
 
-    function GridPhysics(scene, pluginManager) {
-        _classCallCheck(this, GridPhysics);
+  function GridPhysics(scene, pluginManager) {
+    _classCallCheck(this, GridPhysics);
 
-        var _this = _possibleConstructorReturn(this, (GridPhysics.__proto__ || Object.getPrototypeOf(GridPhysics)).call(this, scene, pluginManager));
+    var _this = _possibleConstructorReturn(this, (GridPhysics.__proto__ || Object.getPrototypeOf(GridPhysics)).call(this, scene, pluginManager));
 
-        var config = scene.registry.parent.config.physics.grid;
-        if (scene.registry.parent.config.physics.grid) {
-            var gridSize = config.gridSize;
-            if (!gridSize) {
-                gridSize = { x: 8, y: 8 };
-            }
-            if (typeof gridSize === "number") {
-                gridSize = { x: gridSize, y: gridSize };
-            } else if (!gridSize.hasOwnProperty('x') || !gridSize.hasOwnProperty('y')) {
-                gridSize = { x: 8, y: 8 };
-            }
-            config = {
-                debug: config.debug ? true : false,
-                gridSize: gridSize
-            };
-        }
-
-        Phaser.Physics.GridPhysics = _this;
-        //  The Scene that owns this plugin
-        //this.scene = scene;
-        _this.world = new _world2.default(scene, config);
-        _this.tilemap = new _tilemap2.default();
-        scene.gridPhysics = _this;
-        //this.systems = scene.sys;
-
-        if (!scene.sys.settings.isBooted) {
-            scene.sys.events.once('boot', _this.boot, _this);
-        }
-        return _this;
+    var config = scene.registry.parent.config.physics.grid;
+    if (scene.registry.parent.config.physics.grid) {
+      var gridSize = config.gridSize;
+      if (!gridSize) {
+        gridSize = { x: 8, y: 8 };
+      }
+      if (typeof gridSize === "number") {
+        gridSize = { x: gridSize, y: gridSize };
+      } else if (!gridSize.hasOwnProperty("x") || !gridSize.hasOwnProperty("y")) {
+        gridSize = { x: 8, y: 8 };
+      }
+      config = {
+        debug: config.debug ? true : false,
+        gridSize: gridSize
+      };
     }
 
-    //  Called when the Plugin is booted by the PluginManager.
-    //  If you need to reference other systems in the Scene (like the Loader or DisplayList) then set-up those references now, not in the constructor.
+    Phaser.Physics.GridPhysics = _this;
+    //  The Scene that owns this plugin
+    //this.scene = scene;
+    _this.world = new _world2.default(scene, config);
+    _this.tilemap = new _tilemap2.default();
+    scene.gridPhysics = _this;
+    //this.systems = scene.sys;
+
+    if (!scene.sys.settings.isBooted) {
+      scene.sys.events.once("boot", _this.boot, _this);
+    }
+    return _this;
+  }
+
+  //  Called when the Plugin is booted by the PluginManager.
+  //  If you need to reference other systems in the Scene (like the Loader or DisplayList) then set-up those references now, not in the constructor.
 
 
-    _createClass(GridPhysics, [{
-        key: 'boot',
-        value: function boot() {
-            var eventEmitter = this.systems.events;
-            eventEmitter.on('update', this.update, this);
-            eventEmitter.on('postupdate', this.postUpdate, this);
-            eventEmitter.on('shutdown', this.shutdown, this);
-            eventEmitter.on('destroy', this.destroy, this);
-        }
-    }, {
-        key: 'postUpdate',
-        value: function postUpdate(time, delta) {
-            this.world.bodies.forEach(function (body) {
-                body.postUpdate();
-            });
-        }
-    }, {
-        key: 'update',
-        value: function update(time, delta) {
-            this.world.update(time, delta);
-        }
-        //  Called when a Scene shuts down, it may then come back again later (which will invoke the 'start' event) but should be considered dormant.
+  _createClass(GridPhysics, [{
+    key: "boot",
+    value: function boot() {
+      var eventEmitter = this.systems.events;
+      eventEmitter.on("update", this.update, this);
+      eventEmitter.on("postupdate", this.postUpdate, this);
+      eventEmitter.on("shutdown", this.shutdown, this);
+      eventEmitter.on("destroy", this.destroy, this);
+    }
+  }, {
+    key: "postUpdate",
+    value: function postUpdate(time, delta) {
+      this.world.bodies.forEach(function (body) {
+        body.sprite.active ? body.postUpdate() : null;
+      });
+    }
+  }, {
+    key: "update",
+    value: function update(time, delta) {
+      this.world.update(time, delta);
+    }
+    //  Called when a Scene shuts down, it may then come back again later (which will invoke the 'start' event) but should be considered dormant.
 
-    }, {
-        key: 'shutdown',
-        value: function shutdown() {}
+  }, {
+    key: "shutdown",
+    value: function shutdown() {}
 
-        //  Called when a Scene is destroyed by the Scene Manager. There is no coming back from a destroyed Scene, so clear up all resources here.
+    //  Called when a Scene is destroyed by the Scene Manager. There is no coming back from a destroyed Scene, so clear up all resources here.
 
-    }, {
-        key: 'destroy',
-        value: function destroy() {
-            this.shutdown();
-            this.scene = undefined;
-        }
-    }]);
+  }, {
+    key: "destroy",
+    value: function destroy() {
+      this.shutdown();
+      this.scene = undefined;
+    }
+  }]);
 
-    return GridPhysics;
+  return GridPhysics;
 }(Phaser.Plugins.ScenePlugin);
 
-;
-
 //  Static function called by the PluginFile Loader.
+
+
 GridPhysics.register = function (PluginManager) {
-    //  Register this plugin with the PluginManager, so it can be added to Scenes.
-    PluginManager.register('GridPhysics', GridPhysics, 'GridPhysics');
+  //  Register this plugin with the PluginManager, so it can be added to Scenes.
+  PluginManager.register("GridPhysics", GridPhysics, "GridPhysics");
 };
 
 module.exports = GridPhysics;

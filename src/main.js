@@ -6,85 +6,81 @@
 
 //
 // This plugin is based on Photonstorms Phaser 3 plugin template with added support for ES6.
-// 
+//
 
-import World from './world';
-import Tilemap from './tilemap';
+import World from "./world";
+import Tilemap from "./tilemap";
 
 class GridPhysics extends Phaser.Plugins.ScenePlugin {
-    constructor(scene, pluginManager) {
-        super(scene, pluginManager);
-       
-        let config = scene.registry.parent.config.physics.grid;
-        if(scene.registry.parent.config.physics.grid) {
-            let gridSize =  config.gridSize;
-            if(!gridSize){
-                gridSize = {x: 8, y: 8};
-            }
-            if(typeof(gridSize) === "number"){
-                gridSize = { x: gridSize, y: gridSize};
-            }
-            else if(!gridSize.hasOwnProperty('x') || !gridSize.hasOwnProperty('y')){
-                gridSize = {x: 8, y: 8};
-            }
-            config = {
-                debug: config.debug ? true : false,
-                gridSize
-            };
-        }
-        
+  constructor(scene, pluginManager) {
+    super(scene, pluginManager);
 
-        Phaser.Physics.GridPhysics = this;
-        //  The Scene that owns this plugin
-        //this.scene = scene;
-        this.world = new World(scene, config);
-        this.tilemap = new Tilemap();
-        scene.gridPhysics = this;
-        //this.systems = scene.sys;
-
-        if (!scene.sys.settings.isBooted) {
-            scene.sys.events.once('boot', this.boot, this);
-        }
+    let config = scene.registry.parent.config.physics.grid;
+    if (scene.registry.parent.config.physics.grid) {
+      let gridSize = config.gridSize;
+      if (!gridSize) {
+        gridSize = { x: 8, y: 8 };
+      }
+      if (typeof gridSize === "number") {
+        gridSize = { x: gridSize, y: gridSize };
+      } else if (
+        !gridSize.hasOwnProperty("x") ||
+        !gridSize.hasOwnProperty("y")
+      ) {
+        gridSize = { x: 8, y: 8 };
+      }
+      config = {
+        debug: config.debug ? true : false,
+        gridSize
+      };
     }
 
-    //  Called when the Plugin is booted by the PluginManager.
-    //  If you need to reference other systems in the Scene (like the Loader or DisplayList) then set-up those references now, not in the constructor.
-    boot() {
-        var eventEmitter = this.systems.events;
-        eventEmitter.on('update', this.update, this);
-        eventEmitter.on('postupdate', this.postUpdate, this);
-        eventEmitter.on('shutdown', this.shutdown, this);
-        eventEmitter.on('destroy', this.destroy, this);
+    Phaser.Physics.GridPhysics = this;
+    //  The Scene that owns this plugin
+    //this.scene = scene;
+    this.world = new World(scene, config);
+    this.tilemap = new Tilemap();
+    scene.gridPhysics = this;
+    //this.systems = scene.sys;
+
+    if (!scene.sys.settings.isBooted) {
+      scene.sys.events.once("boot", this.boot, this);
     }
+  }
 
-    postUpdate(time, delta){
-        this.world.bodies.forEach((body) => {
-            body.postUpdate();
-        });
+  //  Called when the Plugin is booted by the PluginManager.
+  //  If you need to reference other systems in the Scene (like the Loader or DisplayList) then set-up those references now, not in the constructor.
+  boot() {
+    var eventEmitter = this.systems.events;
+    eventEmitter.on("update", this.update, this);
+    eventEmitter.on("postupdate", this.postUpdate, this);
+    eventEmitter.on("shutdown", this.shutdown, this);
+    eventEmitter.on("destroy", this.destroy, this);
+  }
 
-    }    
+  postUpdate(time, delta) {
+    this.world.bodies.forEach(body => {
+      body.sprite.active ? body.postUpdate() : null;
+    });
+  }
 
+  update(time, delta) {
+    this.world.update(time, delta);
+  }
+  //  Called when a Scene shuts down, it may then come back again later (which will invoke the 'start' event) but should be considered dormant.
+  shutdown() {}
 
-    update(time, delta) {
-        this.world.update(time, delta);
-    }
-    //  Called when a Scene shuts down, it may then come back again later (which will invoke the 'start' event) but should be considered dormant.
-    shutdown() {}
-
-
-    //  Called when a Scene is destroyed by the Scene Manager. There is no coming back from a destroyed Scene, so clear up all resources here.
-    destroy() {
-        this.shutdown();
-        this.scene = undefined;
-    }
-
-
-};
+  //  Called when a Scene is destroyed by the Scene Manager. There is no coming back from a destroyed Scene, so clear up all resources here.
+  destroy() {
+    this.shutdown();
+    this.scene = undefined;
+  }
+}
 
 //  Static function called by the PluginFile Loader.
-GridPhysics.register = function (PluginManager) {
-    //  Register this plugin with the PluginManager, so it can be added to Scenes.
-    PluginManager.register('GridPhysics', GridPhysics, 'GridPhysics');
-}
+GridPhysics.register = function(PluginManager) {
+  //  Register this plugin with the PluginManager, so it can be added to Scenes.
+  PluginManager.register("GridPhysics", GridPhysics, "GridPhysics");
+};
 
 module.exports = GridPhysics;
